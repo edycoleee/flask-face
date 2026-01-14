@@ -1,3 +1,4 @@
+# run.py
 from flask import Flask
 from flask_restx import Api
 from app.api.halo import api as halo_ns
@@ -5,7 +6,7 @@ import os
 
 def create_app():
     app = Flask(__name__)
-    api = Api(app, version="1.0", title="Flask Gateway API", doc="/docs")
+    api = Api(app, version="1.0", title="Flask Gateway API", doc='/api/docs', prefix='/api')
 
     api.add_namespace(halo_ns, path="/api/halo")
 

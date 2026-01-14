@@ -1,3 +1,4 @@
+#app/services/halo_service.py
 from app.utils.logger import logger
 
 def get_halo():
@@ -8,10 +9,12 @@ def get_halo():
         "data": "Empty Result"
     }
 
+
+
 def post_halo(payload):
     logger.info(f"POST /halo payload: {payload}")
     return {
         "status": "success",
-        "message": payload.get("message", "Post Halo"),
+        "message": "POST HALO :" + payload.get("nama"),
         "data": payload
     }
