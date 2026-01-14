@@ -8,7 +8,7 @@ def create_app():
     app = Flask(__name__)
     api = Api(app, version="1.0", title="Flask Gateway API", doc='/api/docs', prefix='/api')
 
-    api.add_namespace(halo_ns, path="/api/halo")
+    api.add_namespace(halo_ns, path="/halo")
 
     return app
 

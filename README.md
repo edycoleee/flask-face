@@ -126,3 +126,70 @@ handphone = 08111111
 | `/api/halo`     | POST   | form-data / urlencoded | JSON payload |
 
 ---
+
+# Terdapat 2 bentuk input >> from-data dan json, bisa di pilih menyesuaikan api yang akan digunakan 
+
+Bayangkan HTTP itu seperti **layanan kurir paket**. Saat kamu mengirim paket (data) lewat internet, kamu perlu memberi tahu si penerima apa isi di dalam paket tersebut supaya mereka tahu cara membukanya.
+
+**Content-Type** adalah "label" yang ditempel di luar kotak paket tersebut. Tanpa label ini, komputer penerima bakal bingung apakah isinya surat, foto, atau tumpukan berkas.
+
+Berikut adalah penjelasan tiga jenis "label" yang paling sering dipakai:
+
+---
+
+### 1. Application/JSON
+
+**Filosofinya: Kirim Catatan Rapi**
+
+JSON (*JavaScript Object Notation*) itu seperti mengirim **surat dengan format daftar yang sangat rapi**. Isinya hanya teks, tapi diatur dengan aturan tertentu (pakai kurung kurawal `{ }` dan tanda kutip).
+
+* **Kapan dipakai?** Saat aplikasi HP kamu (Instagram/TikTok) minta data ke server, atau saat kamu *login*.
+* **Bentuknya:**
+```json
+{
+  "nama": "Budi",
+  "kelas": "12-IPA",
+  "pesan": "Halo dunia!"
+}
+
+```
+
+
+* **Analogi:** Seperti mengirim formulir pendaftaran yang diketik rapi di selembar kertas tipis. Ringan dan cepat dibaca oleh mesin.
+
+---
+
+### 2. Application/X-WWW-Form-Urlencoded
+
+**Filosofinya: Kirim Pesan Singkat Lewat Link**
+
+Ini adalah cara jadul tapi masih sangat sering dipakai. Data dikirim dalam satu baris panjang yang disambung-sambung dengan tanda `&` dan `=`.
+
+* **Kapan dipakai?** Biasanya digunakan oleh formulir HTML sederhana, seperti kolom pencarian di Google atau form "Hubungi Kami" yang isinya cuma teks pendek.
+* **Bentuknya:** `nama=Budi&kelas=12-IPA&pesan=Halo+dunia`
+* **Analogi:** Seperti menulis pesan singkat di balik kartu pos. Ruangnya terbatas dan tidak bisa dipakai kirim barang aneh-aneh.
+
+---
+
+### 3. Multipart/Form-Data
+
+**Filosofinya: Kirim Paket Komplit (Teks + File)**
+
+Nah, kalau yang ini adalah "raja"-nya pengiriman. Sesuai namanya (*multipart*), paket ini bisa dibagi-bagi menjadi beberapa bagian dalam satu pengiriman. Ada bagian untuk teks, ada bagian khusus untuk file gambar, video, atau dokumen.
+
+* **Kapan dipakai?** Saat kamu posting foto di Instagram lengkap dengan *caption*-nya, atau saat *upload* tugas PDF di Google Classroom.
+* **Kenapa harus ini?** Karena file (seperti `.jpg` atau `.pdf`) itu datanya "berat" dan bukan teks biasa. `multipart` memungkinkan server membedakan mana yang tulisan dan mana yang data gambar.
+* **Analogi:** Seperti mengirim kardus besar yang di dalamnya ada sekat-sekatnya. Satu sekat berisi surat (teks), sekat lainnya berisi flashdisk (file).
+
+---
+
+### Ringkasan Perbandingan
+
+| Jenis Content-Type | Cocok Untuk Apa? | Ibaratnya... |
+| --- | --- | --- |
+| **JSON** | Komunikasi antar aplikasi modern (API). | Surat daftar belanja yang rapi. |
+| **Form-Data** | Form teks sederhana (pencarian/login). | Tulisan di kartu pos. |
+| **Multipart** | Upload file + Teks (Post foto/dokumen). | Kardus paket berisi berbagai barang. |
+
+---
+

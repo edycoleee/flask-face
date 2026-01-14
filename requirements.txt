@@ -3,3 +3,4 @@ flask-restx
 requests
 werkzeug
 gunicorn
+pytest
