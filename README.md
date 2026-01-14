@@ -15,3 +15,13 @@ source venv/bin/activate # Windows: venv\Scripts\activate
 pip install --upgrade pip
 
 pip install -r requirements.txt
+
+
+git init
+git add .
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/edycoleee/flask-face.git
+git push -u origin main
+
+```
