@@ -149,6 +149,7 @@ Jika kita rangkum semua pelajaran kita, urutannya seperti ini:
 7. **Client** menampilkan hasilnya ke kamu.
 
 ---
+# HTTP Methods
 
 Setelah tahu cara "membungkus" paketnya (Content-Type), sekarang kamu harus tahu **"label instruksi"** untuk si kurir. Dalam dunia HTTP, instruksi ini disebut **HTTP Methods** atau sering juga disebut **HTTP Verbs**.
 
