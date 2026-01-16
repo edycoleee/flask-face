@@ -1,5 +1,6 @@
-## FLASK
+# FLASK & BELAJAR HTTP
 
+### FLASK
 
 ```py
 # Update sistem
@@ -27,7 +28,7 @@ git push -u origin main
 
 ```
 ---
-# LAYANAN HTTP
+## LAYANAN HTTP
 
 Bayangkan HTTP itu seperti **layanan kurir paket**. Saat kamu mengirim paket (data) lewat internet, kamu perlu memberi tahu si penerima apa isi di dalam paket tersebut supaya mereka tahu cara membukanya.
 
