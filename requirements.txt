@@ -4,3 +4,4 @@ requests
 werkzeug
 gunicorn
 pytest
+Flask-SQLAlchemy
