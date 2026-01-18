@@ -5,6 +5,7 @@ from app.api.users import api as users_ns
 from app.api.photos import api as photos_ns
 from app.api.training import training_ns
 from app.api.prediction import api as prediction_ns
+from app.api.auth import api as auth_ns
 from app.utils.db import init_db
 import os
 
@@ -18,6 +19,7 @@ def create_app():
     api.add_namespace(photos_ns, path="/photos")
     api.add_namespace(training_ns, path="/training")
     api.add_namespace(prediction_ns, path="/face")
+    api.add_namespace(auth_ns, path="/auth")
 
     # Inisialisasi Database SQLite (Native SQL)
     init_db()

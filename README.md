@@ -204,6 +204,88 @@ curl -X POST http://localhost:5000/api/face/predict \
 
 ---
 
+## � FASE 6: Face Recognition Login
+
+**Authentication API** menggunakan face recognition untuk login.
+
+### Authentication Endpoints
+
+| Endpoint | Method | Deskripsi | Request Body | Response | Status |
+|---------|--------|-----------|--------------|----------|--------|
+| `/api/auth/login-face` | **POST** | Login dengan face recognition (1:N) | `multipart/form-data` → `file: image` | `{ user_id, name, token, confidence, expires_at }` | `200 OK` / `401 Unauthorized` |
+| `/api/auth/login-face-verify` | **POST** | Login dengan face verification (1:1) ⭐ **FASTER** | `user_id (form) + file: image` | `{ match, user_id, name, token, confidence }` | `200 OK` / `403 Forbidden` |
+| `/api/auth/verify` | **POST** | Verify token validity | `{ "token": "uuid" }` | `{ user_id, name, email, ... }` | `200 OK` / `401 Invalid` |
+| `/api/auth/logout` | **POST** | Logout (deactivate token) | `{ "token": "uuid" }` | `{ "message": "Logout successful" }` | `200 OK` |
+| `/api/auth/tokens/<user_id>` | **GET** | Get user's active tokens | – | List of active tokens | `200 OK` |
+
+**2 Login Methods Available:**
+
+**1. Face Recognition (1:N)** - "Siapa kamu?"
+```bash
+# Input: Hanya foto wajah
+# Process: Compare dengan SEMUA user
+# Speed: Lambat (depends on jumlah user)
+curl -X POST http://localhost:5000/api/auth/login-face \
+  -F "file=@face.jpg"
+```
+
+**2. Face Verification (1:1)** - "Apakah kamu John?" ⭐ **RECOMMENDED**
+```bash
+# Input: user_id + foto wajah  
+# Process: Verify 1 user specific saja
+# Speed: Cepat (constant time)
+curl -X POST http://localhost:5000/api/auth/login-face-verify \
+  -F "user_id=2" \
+  -F "file=@face.jpg"
+```
+
+**Why Face Verification (1:1) is Better:**
+- ⚡ **Lebih cepat** - O(1) vs O(N)
+- 🎯 **Lebih akurat** - Focused comparison
+- 💡 **Real use case** - User input email/username dulu
+- 🔒 **More secure** - Explicit identity claim
+
+See [FACE_RECOGNITION_VS_VERIFICATION.md](FACE_RECOGNITION_VS_VERIFICATION.md) for detailed comparison.
+
+**Login Process (Recommended):**
+1. Upload foto wajah
+2. Face recognition (confidence check ≥ 70%)
+3. Generate UUID token (24h expiry)
+4. Save to database
+5. Return token untuk authentication
+
+**Login Response Example:**
+```json
+{
+  "status": "success",
+  "data": {
+    "user_id": 2,
+    "name": "John Doe",
+    "email": "john@example.com",
+    "token": "550e8400-e29b-41d4-a716-446655440000",
+    "confidence": 98.5,
+    "expires_at": "2026-01-19T15:30:00"
+  }
+}
+```
+
+### Testing Face Login
+```bash
+# Complete test workflow
+./test_face_login.sh user_face.jpg
+
+# Manual login
+curl -X POST http://localhost:5000/api/auth/login-face \
+  -F "file=@face.jpg"
+
+# Verify token
+curl -X POST http://localhost:5000/api/auth/verify \
+  -H "Content-Type: application/json" \
+  -d '{"token": "YOUR_TOKEN"}'
+```
+
+---
+
 ## 🖥️ Web Interface
 
 Akses UI lengkap di: `http://localhost:5000`
@@ -223,5 +305,7 @@ Akses UI lengkap di: `http://localhost:5000`
 - **UI_DOCUMENTATION.md** - Web interface guide
 - **RPI5_MODEL_ANALYSIS.md** - Raspberry Pi 5 performance analysis
 - **PREDICTION_DOCUMENTATION.md** - Prediction API & usage guide
+- **FACE_LOGIN_DOCUMENTATION.md** - Face login authentication guide
+- **COMPLETE_WORKFLOW_GUIDE.md** - Full workflow dari A-Z
 
 ---
