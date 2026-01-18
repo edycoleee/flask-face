@@ -20,6 +20,7 @@
                 <button class="tab-btn active" data-tab="users">👥 Users</button>
                 <button class="tab-btn" data-tab="photos">📸 Photos</button>
                 <button class="tab-btn" data-tab="training">🧠 Training</button>
+                <button class="tab-btn" data-tab="prediction">🔮 Prediction</button>
             </div>
 
             <!-- USERS SECTION -->
@@ -94,9 +95,9 @@
                         <h2>📤 Upload Photos</h2>
                         
                         <div class="upload-tabs">
-                            <button class="upload-tab-btn active" data-upload-tab="single">Single Photo</button>
-                            <button class="upload-tab-btn" data-upload-tab="multiple">Multiple Photos</button>
-                            <button class="upload-tab-btn" data-upload-tab="camera">📷 Capture from Camera</button>
+                            <button class="upload-tab-btn active" data-upload-tab="singleUpload">Single Photo</button>
+                            <button class="upload-tab-btn" data-upload-tab="multipleUpload">Multiple Photos</button>
+                            <button class="upload-tab-btn" data-upload-tab="cameraUpload">📷 Capture from Camera</button>
                         </div>
 
                         <!-- Single Photo Upload -->
@@ -241,6 +242,76 @@
                         <button class="btn btn-secondary" onclick="checkModelStatus()">🔄 Refresh Status</button>
                         <div id="modelStatus" class="model-status">
                             <div class="loading">Loading model status...</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PREDICTION SECTION -->
+            <section id="prediction-tab" class="tab-content">
+                <div class="section-container">
+                    <!-- Model Status Check -->
+                    <div class="card">
+                        <h2>🤖 Model Status</h2>
+                        <button class="btn btn-secondary" onclick="checkPredictionModelStatus()">🔄 Refresh Status</button>
+                        <div id="predictionModelStatus" class="model-status">
+                            <div class="loading">Loading model status...</div>
+                        </div>
+                    </div>
+
+                    <!-- Prediction Input -->
+                    <div class="card">
+                        <h2>🔮 Face Recognition Prediction</h2>
+                        <p class="card-description">Upload atau capture foto untuk identifikasi wajah</p>
+                        
+                        <div class="upload-tabs">
+                            <button class="upload-tab-btn active" data-upload-tab="predictUpload">📤 Upload Photo</button>
+                            <button class="upload-tab-btn" data-upload-tab="predictCamera">📷 Capture from Camera</button>
+                        </div>
+
+                        <!-- Upload Photo for Prediction -->
+                        <div id="predictUploadTab" class="upload-tab-content active">
+                            <form id="predictUploadForm" class="form">
+                                <div class="form-group">
+                                    <label for="predictPhotoFile">Select Photo (JPG/PNG)</label>
+                                    <input type="file" id="predictPhotoFile" name="file" accept="image/jpeg,image/png" required>
+                                </div>
+                                <div class="preview-container" id="predictUploadPreview"></div>
+                                <button type="submit" class="btn btn-primary btn-large">🔍 Predict Face</button>
+                            </form>
+                            <div id="predictUploadMessage" class="message"></div>
+                        </div>
+
+                        <!-- Camera Capture for Prediction -->
+                        <div id="predictCameraTab" class="upload-tab-content">
+                            <div class="camera-container">
+                                <div class="camera-controls">
+                                    <button type="button" class="btn btn-secondary" id="startPredictCameraBtn" onclick="startPredictCamera()">🎥 Start Camera</button>
+                                    <button type="button" class="btn btn-secondary" id="stopPredictCameraBtn" onclick="stopPredictCamera()" style="display: none;">⏹️ Stop Camera</button>
+                                </div>
+                                
+                                <video id="predictCameraStream" class="camera-stream" style="display: none;"></video>
+                                <canvas id="predictCaptureCanvas" style="display: none;"></canvas>
+                                
+                                <div id="predictCaptureContainer" style="display: none;">
+                                    <button type="button" class="btn btn-primary btn-large" id="predictCaptureBtn" onclick="capturePredictPhoto()">📸 Capture Photo</button>
+                                </div>
+                                
+                                <div id="predictCameraPreview" class="preview-container"></div>
+                                
+                                <form id="predictCameraForm" class="form" style="display: none;">
+                                    <button type="submit" class="btn btn-primary btn-large">🔍 Predict Face</button>
+                                </form>
+                                <div id="predictCameraMessage" class="message"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Prediction Results -->
+                    <div class="card" id="predictionResultsCard" style="display: none;">
+                        <h2>📊 Prediction Results</h2>
+                        <div id="predictionResults" class="prediction-results">
+                            <!-- Results will be populated here -->
                         </div>
                     </div>
                 </div>

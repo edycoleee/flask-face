@@ -146,3 +146,82 @@ Kalau kamu ingin menghilangkannya dari Swagger, itu juga bisa — tapi biasanya 
 
 ---
 
+## 🧠 FASE 4: CNN Model Training
+
+**Training API** untuk train model face recognition dengan MobileNetV2.
+
+### Training Endpoint
+
+| Endpoint | Method | Deskripsi | Request Body | Response | Status |
+|---------|--------|-----------|--------------|----------|--------|
+| `/api/training/start` | **POST** | Mulai training model CNN | `{ "epochs": 50, "batch_size": 16, "validation_split": 0.2, "continue_training": false }` | Training stats & model info | `200 OK` / `500 Error` |
+| `/api/training/status` | **GET** | Check model status & accuracy | – | Model info & metrics | `200 OK` / `404 Not Found` |
+
+**Model Architecture**: MobileNetV2 (pre-trained, transfer learning)  
+**Input**: Images dari `dataset/<user_id>/` folder  
+**Output**: `models/model.h5`, `models/label_map.json`, `models/accuracy.json`
+
+---
+
+## 🔮 FASE 5: Face Recognition Prediction
+
+**Prediction API** untuk identifikasi wajah dari foto.
+
+### Prediction Endpoints
+
+| Endpoint | Method | Deskripsi | Request Body | Response | Status |
+|---------|--------|-----------|--------------|----------|--------|
+| `/api/face/predict` | **POST** | Predict user dari foto wajah | `multipart/form-data` → `file: image` | `{ user_id, name, email, confidence, all_predictions }` | `200 OK` / `404 Model Not Found` |
+| `/api/face/model-info` | **GET** | Get model information & status | – | `{ loaded, num_classes, accuracy, ... }` | `200 OK` / `404 Not Found` |
+
+**Prediction Response Example**:
+```json
+{
+  "status": "success",
+  "data": {
+    "user_id": 2,
+    "name": "John Doe",
+    "email": "john@example.com",
+    "confidence": 98.45,
+    "all_predictions": [
+      { "user_id": 2, "name": "John Doe", "confidence": 98.45 },
+      { "user_id": 3, "name": "Jane Smith", "confidence": 1.23 },
+      { "user_id": 4, "name": "Bob Wilson", "confidence": 0.32 }
+    ]
+  }
+}
+```
+
+### Testing Prediction
+```bash
+# Test with image file
+./test_prediction.sh path/to/photo.jpg
+
+# Or using curl
+curl -X POST http://localhost:5000/api/face/predict \
+  -F "file=@photo.jpg"
+```
+
+---
+
+## 🖥️ Web Interface
+
+Akses UI lengkap di: `http://localhost:5000`
+
+**4 Tabs Tersedia**:
+1. **👥 Users** - Manage users (create, list, edit, delete)
+2. **📸 Photos** - Upload photos (single, multiple, camera capture)
+3. **🧠 Training** - Train CNN model with config
+4. **🔮 Prediction** - Face recognition (upload or camera)
+
+---
+
+## 📚 Documentation
+
+- **PHOTO_API_QUICK_REFERENCE.md** - Quick photo upload reference
+- **PHOTO_API_IMPLEMENTATION.md** - Detailed photo API docs
+- **UI_DOCUMENTATION.md** - Web interface guide
+- **RPI5_MODEL_ANALYSIS.md** - Raspberry Pi 5 performance analysis
+- **PREDICTION_DOCUMENTATION.md** - Prediction API & usage guide
+
+---

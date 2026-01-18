@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadUsers();
     loadUsersForPhotoSelection();
     checkModelStatus();
+    checkPredictionModelStatus();
     
     // Setup file preview
     setupFilePreview();
@@ -44,19 +45,30 @@ function setupTabNavigation() {
 
 function setupUploadTabs() {
     const uploadTabBtns = document.querySelectorAll('.upload-tab-btn');
-    const uploadTabContents = document.querySelectorAll('.upload-tab-content');
     
     uploadTabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
             const tabId = btn.getAttribute('data-upload-tab');
             
-            // Remove active class from all
-            uploadTabBtns.forEach(b => b.classList.remove('active'));
-            uploadTabContents.forEach(c => c.classList.remove('active'));
+            // Find parent container to scope the tab switching
+            const parentCard = btn.closest('.card');
+            if (!parentCard) return;
+            
+            // Remove active class from siblings only
+            const siblingBtns = parentCard.querySelectorAll('.upload-tab-btn');
+            const siblingContents = parentCard.querySelectorAll('.upload-tab-content');
+            
+            siblingBtns.forEach(b => b.classList.remove('active'));
+            siblingContents.forEach(c => c.classList.remove('active'));
             
             // Add active class to current
             btn.classList.add('active');
-            document.getElementById(tabId + 'UploadTab').classList.add('active');
+            
+            // Activate corresponding content
+            const targetContent = parentCard.querySelector(`#${tabId}Tab`);
+            if (targetContent) {
+                targetContent.classList.add('active');
+            }
         });
     });
 }
@@ -98,12 +110,25 @@ function setupForms() {
     if (trainingForm) {
         trainingForm.addEventListener('submit', startTraining);
     }
+    
+    // Prediction Upload Form
+    const predictUploadForm = document.getElementById('predictUploadForm');
+    if (predictUploadForm) {
+        predictUploadForm.addEventListener('submit', handlePredictUpload);
+    }
+    
+    // Prediction Camera Form
+    const predictCameraForm = document.getElementById('predictCameraForm');
+    if (predictCameraForm) {
+        predictCameraForm.addEventListener('submit', handlePredictCamera);
+    }
 }
 
 // ==================== FILE PREVIEW ====================
 function setupFilePreview() {
     const singlePhotoFile = document.getElementById('singlePhotoFile');
     const multiplePhotoFiles = document.getElementById('multiplePhotoFiles');
+    const predictPhotoFile = document.getElementById('predictPhotoFile');
     
     if (singlePhotoFile) {
         singlePhotoFile.addEventListener('change', function() {
@@ -114,6 +139,12 @@ function setupFilePreview() {
     if (multiplePhotoFiles) {
         multiplePhotoFiles.addEventListener('change', function() {
             previewFile(this, 'multiplePreview', false);
+        });
+    }
+    
+    if (predictPhotoFile) {
+        predictPhotoFile.addEventListener('change', function() {
+            previewFile(this, 'predictUploadPreview', true);
         });
     }
 }
@@ -1052,4 +1083,285 @@ function displayModelStatus(status) {
     }
     
     statusContainer.innerHTML = statusHTML;
+}
+
+// ==================== PREDICTION FUNCTIONS ====================
+
+// Check Prediction Model Status
+async function checkPredictionModelStatus() {
+    const statusContainer = document.getElementById('predictionModelStatus');
+    
+    try {
+        statusContainer.innerHTML = '<div class="loading">Checking model status...</div>';
+        
+        const response = await fetch(`${API_BASE}/face/model-info`);
+        const result = await response.json();
+        
+        if (result.status === 'success' && result.data.loaded) {
+            const info = result.data;
+            statusContainer.innerHTML = `
+                <div class="status-grid">
+                    <div class="status-item status-success">
+                        <div class="label">Status</div>
+                        <div class="value">✅ Model Ready</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="label">Number of Classes</div>
+                        <div class="value">${info.num_classes}</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="label">Test Accuracy</div>
+                        <div class="value">${(info.accuracy * 100).toFixed(2)}%</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="label">Trained Users</div>
+                        <div class="value">${info.classes.join(', ')}</div>
+                    </div>
+                </div>
+            `;
+        } else {
+            statusContainer.innerHTML = `
+                <div class="status-grid">
+                    <div class="status-item status-error">
+                        <div class="label">Status</div>
+                        <div class="value">❌ Model Not Found</div>
+                    </div>
+                </div>
+                <p style="margin-top: 15px; color: #6b7280;">
+                    Please train the model first in the Training tab.
+                </p>
+            `;
+        }
+    } catch (error) {
+        console.error('Error checking prediction model status:', error);
+        statusContainer.innerHTML = `
+            <div class="error">
+                ❌ Failed to check model status: ${error.message}
+            </div>
+        `;
+    }
+}
+
+// Handle Predict Upload
+async function handlePredictUpload(e) {
+    e.preventDefault();
+    
+    const fileInput = document.getElementById('predictPhotoFile');
+    const messageDiv = document.getElementById('predictUploadMessage');
+    const resultsCard = document.getElementById('predictionResultsCard');
+    const resultsDiv = document.getElementById('predictionResults');
+    
+    if (!fileInput.files || fileInput.files.length === 0) {
+        messageDiv.innerHTML = '<div class="error">❌ Please select a photo</div>';
+        return;
+    }
+    
+    const file = fileInput.files[0];
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+        messageDiv.innerHTML = '<div class="loading">🔍 Analyzing face...</div>';
+        resultsCard.style.display = 'none';
+        
+        const response = await fetch(`${API_BASE}/face/predict`, {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            messageDiv.innerHTML = '<div class="success">✅ Prediction successful!</div>';
+            displayPredictionResults(result.data);
+            
+            // Reset form
+            fileInput.value = '';
+            document.getElementById('predictUploadPreview').innerHTML = '';
+        } else {
+            messageDiv.innerHTML = `<div class="error">❌ ${result.message}</div>`;
+        }
+    } catch (error) {
+        console.error('Error predicting:', error);
+        messageDiv.innerHTML = `<div class="error">❌ Prediction failed: ${error.message}</div>`;
+    }
+}
+
+// Handle Predict Camera
+async function handlePredictCamera(e) {
+    e.preventDefault();
+    
+    const messageDiv = document.getElementById('predictCameraMessage');
+    const resultsCard = document.getElementById('predictionResultsCard');
+    
+    const canvas = document.getElementById('predictCaptureCanvas');
+    
+    try {
+        messageDiv.innerHTML = '<div class="loading">🔍 Analyzing face...</div>';
+        resultsCard.style.display = 'none';
+        
+        // Convert canvas to blob
+        canvas.toBlob(async (blob) => {
+            const formData = new FormData();
+            formData.append('file', blob, 'capture.jpg');
+            
+            const response = await fetch(`${API_BASE}/face/predict`, {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (result.status === 'success') {
+                messageDiv.innerHTML = '<div class="success">✅ Prediction successful!</div>';
+                displayPredictionResults(result.data);
+            } else {
+                messageDiv.innerHTML = `<div class="error">❌ ${result.message}</div>`;
+            }
+        }, 'image/jpeg');
+        
+    } catch (error) {
+        console.error('Error predicting:', error);
+        messageDiv.innerHTML = `<div class="error">❌ Prediction failed: ${error.message}</div>`;
+    }
+}
+
+// Display Prediction Results
+function displayPredictionResults(data) {
+    const resultsCard = document.getElementById('predictionResultsCard');
+    const resultsDiv = document.getElementById('predictionResults');
+    
+    let html = `
+        <div class="prediction-main">
+            <div class="prediction-header">
+                <h3>🎯 Identified User</h3>
+            </div>
+            <div class="prediction-user">
+                <div class="user-avatar">${data.name.charAt(0).toUpperCase()}</div>
+                <div class="user-details">
+                    <div class="user-name">${data.name}</div>
+                    <div class="user-email">${data.email}</div>
+                    <div class="user-id">User ID: ${data.user_id}</div>
+                </div>
+                <div class="confidence-badge">
+                    <div class="confidence-label">Confidence</div>
+                    <div class="confidence-value">${data.confidence}%</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="prediction-alternatives">
+            <h4>📊 All Predictions (Top 3)</h4>
+            <table class="prediction-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>User ID</th>
+                        <th>Name</th>
+                        <th>Confidence</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    
+    data.all_predictions.forEach((pred, index) => {
+        const isTop = index === 0;
+        html += `
+            <tr class="${isTop ? 'top-prediction' : ''}">
+                <td>${index + 1}</td>
+                <td>${pred.user_id}</td>
+                <td>${pred.name}</td>
+                <td>
+                    <div class="confidence-bar-container">
+                        <div class="confidence-bar" style="width: ${pred.confidence}%"></div>
+                        <span class="confidence-text">${pred.confidence}%</span>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+    
+    html += `
+                </tbody>
+            </table>
+        </div>
+    `;
+    
+    resultsDiv.innerHTML = html;
+    resultsCard.style.display = 'block';
+    
+    // Scroll to results
+    resultsCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// Camera functions for prediction
+let predictCameraStream = null;
+
+async function startPredictCamera() {
+    try {
+        const video = document.getElementById('predictCameraStream');
+        const startBtn = document.getElementById('startPredictCameraBtn');
+        const stopBtn = document.getElementById('stopPredictCameraBtn');
+        const captureContainer = document.getElementById('predictCaptureContainer');
+        
+        predictCameraStream = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: 'user' } 
+        });
+        
+        video.srcObject = predictCameraStream;
+        video.play();
+        
+        video.style.display = 'block';
+        startBtn.style.display = 'none';
+        stopBtn.style.display = 'inline-block';
+        captureContainer.style.display = 'block';
+        
+    } catch (error) {
+        console.error('Error starting camera:', error);
+        alert('Failed to start camera: ' + error.message);
+    }
+}
+
+function stopPredictCamera() {
+    if (predictCameraStream) {
+        predictCameraStream.getTracks().forEach(track => track.stop());
+        predictCameraStream = null;
+    }
+    
+    const video = document.getElementById('predictCameraStream');
+    const startBtn = document.getElementById('startPredictCameraBtn');
+    const stopBtn = document.getElementById('stopPredictCameraBtn');
+    const captureContainer = document.getElementById('predictCaptureContainer');
+    
+    video.style.display = 'none';
+    startBtn.style.display = 'inline-block';
+    stopBtn.style.display = 'none';
+    captureContainer.style.display = 'none';
+}
+
+function capturePredictPhoto() {
+    const video = document.getElementById('predictCameraStream');
+    const canvas = document.getElementById('predictCaptureCanvas');
+    const previewDiv = document.getElementById('predictCameraPreview');
+    const form = document.getElementById('predictCameraForm');
+    
+    // Set canvas size to video size
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    
+    // Draw video frame to canvas
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0);
+    
+    // Show preview
+    const imageUrl = canvas.toDataURL('image/jpeg');
+    previewDiv.innerHTML = `
+        <img src="${imageUrl}" alt="Captured" style="max-width: 100%; border-radius: 8px;">
+    `;
+    
+    // Show upload form
+    form.style.display = 'block';
+    
+    // Stop camera
+    stopPredictCamera();
 }
