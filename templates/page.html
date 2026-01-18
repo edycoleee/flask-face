@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask Face - User & Photo Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='page.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🎭 Flask Face API</h1>
+            <p class="subtitle">User & Photo Management System</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Tabs Navigation -->
+            <div class="tabs-nav">
+                <button class="tab-btn active" data-tab="users">👥 Users</button>
+                <button class="tab-btn" data-tab="photos">📸 Photos</button>
+            </div>
+
+            <!-- USERS SECTION -->
+            <section id="users-tab" class="tab-content active">
+                <div class="section-container">
+                    <!-- Create User Form -->
+                    <div class="card">
+                        <h2>➕ Create New User</h2>
+                        <form id="createUserForm" class="form">
+                            <div class="form-group">
+                                <label for="userName">Name</label>
+                                <input type="text" id="userName" name="name" placeholder="Enter user name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="userEmail">Email</label>
+                                <input type="email" id="userEmail" name="email" placeholder="Enter user email" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Create User</button>
+                        </form>
+                        <div id="createUserMessage" class="message"></div>
+                    </div>
+
+                    <!-- Users List -->
+                    <div class="card">
+                        <h2>📋 Users List</h2>
+                        <button class="btn btn-secondary" onclick="loadUsers()">🔄 Refresh</button>
+                        
+                        <div id="usersContainer" class="users-list">
+                            <div class="loading">Loading users...</div>
+                        </div>
+                    </div>
+
+                    <!-- Edit User Modal -->
+                    <div id="editUserModal" class="modal">
+                        <div class="modal-content">
+                            <span class="close" onclick="closeEditUserModal()">&times;</span>
+                            <h2>✏️ Edit User</h2>
+                            <form id="editUserForm" class="form">
+                                <input type="hidden" id="editUserId" name="id">
+                                <div class="form-group">
+                                    <label for="editUserName">Name</label>
+                                    <input type="text" id="editUserName" name="name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="editUserEmail">Email</label>
+                                    <input type="email" id="editUserEmail" name="email" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Update User</button>
+                            </form>
+                            <div id="editUserMessage" class="message"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PHOTOS SECTION -->
+            <section id="photos-tab" class="tab-content">
+                <div class="section-container">
+                    <!-- Select User for Photos -->
+                    <div class="card">
+                        <h2>👤 Select User</h2>
+                        <div class="form-group">
+                            <label for="photoUserId">User</label>
+                            <select id="photoUserId" onchange="onUserSelected()">
+                                <option value="">-- Select User --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Upload Photos -->
+                    <div class="card" id="uploadSection" style="display: none;">
+                        <h2>📤 Upload Photos</h2>
+                        
+                        <div class="upload-tabs">
+                            <button class="upload-tab-btn active" data-upload-tab="single">Single Photo</button>
+                            <button class="upload-tab-btn" data-upload-tab="multiple">Multiple Photos</button>
+                            <button class="upload-tab-btn" data-upload-tab="camera">📷 Capture from Camera</button>
+                        </div>
+
+                        <!-- Single Photo Upload -->
+                        <div id="singleUploadTab" class="upload-tab-content active">
+                            <form id="uploadSingleForm" class="form">
+                                <div class="form-group">
+                                    <label for="singlePhotoFile">Select Photo (JPG/PNG)</label>
+                                    <input type="file" id="singlePhotoFile" name="file" accept="image/jpeg,image/png" required>
+                                </div>
+                                <div class="preview-container" id="singlePreview"></div>
+                                <button type="submit" class="btn btn-primary">Upload Photo</button>
+                            </form>
+                            <div id="singleUploadMessage" class="message"></div>
+                        </div>
+
+                        <!-- Multiple Photos Upload -->
+                        <div id="multipleUploadTab" class="upload-tab-content">
+                            <form id="uploadMultipleForm" class="form">
+                                <div class="form-group">
+                                    <label for="multiplePhotoFiles">Select Photos (JPG/PNG)</label>
+                                    <input type="file" id="multiplePhotoFiles" name="files" accept="image/jpeg,image/png" multiple required>
+                                </div>
+                                <div class="preview-container" id="multiplePreview"></div>
+                                <button type="submit" class="btn btn-primary">Upload Photos</button>
+                            </form>
+                            <div id="multipleUploadMessage" class="message"></div>
+                        </div>
+
+                        <!-- Camera Capture -->
+                        <div id="cameraUploadTab" class="upload-tab-content">
+                            <div class="camera-container">
+                                <div class="camera-controls">
+                                    <button type="button" class="btn btn-secondary" id="startCameraBtn" onclick="startCamera()">🎥 Start Camera</button>
+                                    <button type="button" class="btn btn-secondary" id="stopCameraBtn" onclick="stopCamera()" style="display: none;">⏹️ Stop Camera</button>
+                                </div>
+                                
+                                <video id="cameraStream" class="camera-stream" style="display: none;"></video>
+                                <canvas id="captureCanvas" style="display: none;"></canvas>
+                                
+                                <div id="captureContainer" style="display: none;">
+                                    <button type="button" class="btn btn-primary btn-large" id="captureBtn" onclick="capturePhoto()">📸 Capture Photo</button>
+                                </div>
+                                
+                                <div id="cameraPreview" class="preview-container"></div>
+                                
+                                <form id="uploadCameraForm" class="form" style="display: none;">
+                                    <button type="submit" class="btn btn-primary">Upload Captured Photo</button>
+                                </form>
+                                <div id="cameraUploadMessage" class="message"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Photos Gallery -->
+                    <div class="card" id="photosSection" style="display: none;">
+                        <h2>🖼️ User Photos Gallery</h2>
+                        <button class="btn btn-secondary" onclick="loadUserPhotos()">🔄 Refresh</button>
+                        
+                        <div id="photosContainer" class="photos-gallery">
+                            <div class="loading">No user selected</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Flask Face API v1.0 | Built with ❤️</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='page.js') }}"></script>
+</body>
+</html>

@@ -22,5 +22,17 @@ def init_db():
             email TEXT UNIQUE NOT NULL
         )
     ''')
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS photos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            filename TEXT NOT NULL,
+            filepath TEXT NOT NULL,
+            width INTEGER DEFAULT 224,
+            height INTEGER DEFAULT 224,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    ''')
     conn.commit()
     conn.close()
