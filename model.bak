@@ -1,0 +1,49 @@
+    def build_model(self, num_classes):
+        """Build CNN model untuk face recognition"""
+        logger.info("Building CNN model...")
+        
+        model = models.Sequential([
+            # Block 1
+            layers.Conv2D(32, (3, 3), activation='relu', padding='same', 
+                         input_shape=(224, 224, 3)),
+            layers.BatchNormalization(),
+            layers.Conv2D(32, (3, 3), activation='relu', padding='same'),
+            layers.BatchNormalization(),
+            layers.MaxPooling2D((2, 2)),
+            layers.Dropout(0.25),
+            
+            # Block 2
+            layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
+            layers.BatchNormalization(),
+            layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
+            layers.BatchNormalization(),
+            layers.MaxPooling2D((2, 2)),
+            layers.Dropout(0.25),
+            
+            # Block 3
+            layers.Conv2D(128, (3, 3), activation='relu', padding='same'),
+            layers.BatchNormalization(),
+            layers.Conv2D(128, (3, 3), activation='relu', padding='same'),
+            layers.BatchNormalization(),
+            layers.MaxPooling2D((2, 2)),
+            layers.Dropout(0.25),
+            
+            # Block 4
+            layers.Conv2D(256, (3, 3), activation='relu', padding='same'),
+            layers.BatchNormalization(),
+            layers.Conv2D(256, (3, 3), activation='relu', padding='same'),
+            layers.BatchNormalization(),
+            layers.MaxPooling2D((2, 2)),
+            layers.Dropout(0.25),
+            
+            # Flatten & Dense
+            layers.Flatten(),
+            layers.Dense(512, activation='relu'),
+            layers.BatchNormalization(),
+            layers.Dropout(0.5),
+            layers.Dense(256, activation='relu'),
+            layers.BatchNormalization(),
+            layers.Dropout(0.5),
+            layers.Dense(num_classes, activation='softmax')
+        ])
+        

@@ -7,12 +7,14 @@ from datetime import datetime
 import logging
 
 try:
+    import tensorflow as tf
     from tensorflow import keras
     from tensorflow.keras import layers, models
     from tensorflow.keras.preprocessing.image import ImageDataGenerator, load_img, img_to_array
     TENSORFLOW_AVAILABLE = True
 except ImportError:
     TENSORFLOW_AVAILABLE = False
+    tf = None
     keras = None
     layers = None
     models = None
@@ -114,63 +116,44 @@ class TrainingService:
         return images, labels_encoded, num_classes
     
     def build_model(self, num_classes):
-        """Build CNN model untuk face recognition"""
-        logger.info("Building CNN model...")
+        """Build CNN model untuk face recognition menggunakan MobileNetV2 (pre-trained)"""
+        logger.info("Building MobileNetV2 model with transfer learning...")
         
+        # Load MobileNetV2 pre-trained on ImageNet
+        base_model = keras.applications.MobileNetV2(
+            input_shape=(224, 224, 3),
+            include_top=False,
+            weights='imagenet'
+        )
+        
+        # Freeze base model layers untuk transfer learning yang lebih efisien
+        # Hanya train layers terakhir untuk adaptasi ke dataset kita
+        base_model.trainable = False
+        
+        # Build model dengan custom classification head
         model = models.Sequential([
-            # Block 1
-            layers.Conv2D(32, (3, 3), activation='relu', padding='same', 
-                         input_shape=(224, 224, 3)),
-            layers.BatchNormalization(),
-            layers.Conv2D(32, (3, 3), activation='relu', padding='same'),
-            layers.BatchNormalization(),
-            layers.MaxPooling2D((2, 2)),
-            layers.Dropout(0.25),
-            
-            # Block 2
-            layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
-            layers.BatchNormalization(),
-            layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
-            layers.BatchNormalization(),
-            layers.MaxPooling2D((2, 2)),
-            layers.Dropout(0.25),
-            
-            # Block 3
-            layers.Conv2D(128, (3, 3), activation='relu', padding='same'),
-            layers.BatchNormalization(),
-            layers.Conv2D(128, (3, 3), activation='relu', padding='same'),
-            layers.BatchNormalization(),
-            layers.MaxPooling2D((2, 2)),
-            layers.Dropout(0.25),
-            
-            # Block 4
-            layers.Conv2D(256, (3, 3), activation='relu', padding='same'),
-            layers.BatchNormalization(),
-            layers.Conv2D(256, (3, 3), activation='relu', padding='same'),
-            layers.BatchNormalization(),
-            layers.MaxPooling2D((2, 2)),
-            layers.Dropout(0.25),
-            
-            # Flatten & Dense
-            layers.Flatten(),
-            layers.Dense(512, activation='relu'),
+            base_model,
+            layers.GlobalAveragePooling2D(),
             layers.BatchNormalization(),
             layers.Dropout(0.5),
-            layers.Dense(256, activation='relu'),
+            layers.Dense(128, activation='relu'),
             layers.BatchNormalization(),
-            layers.Dropout(0.5),
+            layers.Dropout(0.3),
             layers.Dense(num_classes, activation='softmax')
         ])
         
-        # Tuned learning rate untuk akurasi lebih baik
+        # Compile dengan learning rate yang optimal untuk transfer learning
         model.compile(
-            optimizer=keras.optimizers.Adam(learning_rate=0.0005),
+            optimizer=keras.optimizers.Adam(learning_rate=0.001),
             loss='categorical_crossentropy',
             metrics=['accuracy']
         )
         
-        logger.info("Model built successfully")
-        logger.info(f"Model parameters: {model.count_params():,}")
+        logger.info("✓ MobileNetV2 model built successfully")
+        logger.info(f"  Base model: MobileNetV2 (ImageNet weights)")
+        logger.info(f"  Total parameters: {model.count_params():,}")
+        logger.info(f"  Trainable parameters: {sum([tf.size(w).numpy() for w in model.trainable_weights]):,}")
+        logger.info(f"  Non-trainable parameters: {sum([tf.size(w).numpy() for w in model.non_trainable_weights]):,}")
         
         return model
     

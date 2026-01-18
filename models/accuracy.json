@@ -1,10 +1,10 @@
 {
-  "test_loss": 1.0975972414016724,
-  "test_accuracy": 0.3333333432674408,
-  "training_accuracy": 0.5384615659713745,
-  "training_loss": 1.4642783403396606,
-  "validation_accuracy": 0.0,
-  "validation_loss": 3.317255735397339,
-  "epochs_trained": 11,
-  "timestamp": "2026-01-18T12:40:54.227276"
+  "test_loss": 0.21364238858222961,
+  "test_accuracy": 1.0,
+  "training_accuracy": 0.9615384340286255,
+  "training_loss": 0.07738770544528961,
+  "validation_accuracy": 1.0,
+  "validation_loss": 0.29632821679115295,
+  "epochs_trained": 23,
+  "timestamp": "2026-01-18T15:39:15.741682"
 }
