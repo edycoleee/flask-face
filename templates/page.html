@@ -19,6 +19,7 @@
             <div class="tabs-nav">
                 <button class="tab-btn active" data-tab="users">👥 Users</button>
                 <button class="tab-btn" data-tab="photos">📸 Photos</button>
+                <button class="tab-btn" data-tab="training">🧠 Training</button>
             </div>
 
             <!-- USERS SECTION -->
@@ -156,6 +157,90 @@
                         
                         <div id="photosContainer" class="photos-gallery">
                             <div class="loading">No user selected</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TRAINING SECTION -->
+            <section id="training-tab" class="tab-content">
+                <div class="section-container">
+                    <!-- Training Configuration -->
+                    <div class="card">
+                        <h2>🧠 CNN Model Training</h2>
+                        <p class="card-description">Train face recognition model with your dataset</p>
+                        
+                        <form id="trainingForm" class="form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="trainingMode">Training Mode</label>
+                                    <select id="trainingMode" name="continue_training">
+                                        <option value="false">🆕 New Training (Reset Model)</option>
+                                        <option value="true">🔄 Continue Training (Lanjut)</option>
+                                    </select>
+                                    <small class="form-help">Reset akan membuat model baru, Continue akan lanjut dari model yang ada</small>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="epochs">Epochs</label>
+                                    <input type="number" id="epochs" name="epochs" value="50" min="10" max="200" required>
+                                    <small class="form-help">Jumlah iterasi training (default: 50)</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="batchSize">Batch Size</label>
+                                    <input type="number" id="batchSize" name="batch_size" value="16" min="4" max="64" required>
+                                    <small class="form-help">Ukuran batch per iterasi (default: 16)</small>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="validationSplit">Validation Split</label>
+                                    <input type="number" id="validationSplit" name="validation_split" value="0.2" min="0.1" max="0.4" step="0.05" required>
+                                    <small class="form-help">Rasio data validasi (0.2 = 20%)</small>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary btn-large" id="startTrainingBtn">
+                                    🚀 Start Training
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="checkModelStatus()">
+                                    📊 Check Model Status
+                                </button>
+                            </div>
+                        </form>
+                        <div id="trainingMessage" class="message"></div>
+                    </div>
+
+                    <!-- Training Progress -->
+                    <div class="card" id="trainingProgressCard" style="display: none;">
+                        <h2>⏳ Training Progress</h2>
+                        <div id="trainingProgress" class="training-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+                            </div>
+                            <p class="progress-text" id="progressText">Initializing...</p>
+                        </div>
+                    </div>
+
+                    <!-- Training Results -->
+                    <div class="card" id="trainingResultsCard" style="display: none;">
+                        <h2>📈 Training Results</h2>
+                        <div id="trainingResults" class="training-results">
+                            <!-- Results will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Model Status -->
+                    <div class="card">
+                        <h2>🔍 Current Model Status</h2>
+                        <button class="btn btn-secondary" onclick="checkModelStatus()">🔄 Refresh Status</button>
+                        <div id="modelStatus" class="model-status">
+                            <div class="loading">Loading model status...</div>
                         </div>
                     </div>
                 </div>

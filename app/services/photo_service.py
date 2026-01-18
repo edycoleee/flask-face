@@ -7,7 +7,7 @@ from app.utils.db import get_db_connection
 from app.utils.logger import logger
 
 DATASET_DIR = "dataset"
-ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png'}
+ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif'}
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 RESIZE_WIDTH = 224
 RESIZE_HEIGHT = 224
@@ -49,7 +49,7 @@ class PhotoService:
                 return None, "File tidak ditemukan"
             
             if not PhotoService.allowed_file(file.filename):
-                return None, "Format file hanya boleh JPG/PNG"
+                return None, "Format file hanya boleh JPG/PNG/GIF"
             
             if len(file.read()) > MAX_FILE_SIZE:
                 file.seek(0)

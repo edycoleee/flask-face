@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load initial data
     loadUsers();
     loadUsersForPhotoSelection();
+    checkModelStatus();
     
     // Setup file preview
     setupFilePreview();
@@ -90,6 +91,12 @@ function setupForms() {
     const uploadCameraForm = document.getElementById('uploadCameraForm');
     if (uploadCameraForm) {
         uploadCameraForm.addEventListener('submit', handleUploadCameraPhoto);
+    }
+    
+    // Training Form
+    const trainingForm = document.getElementById('trainingForm');
+    if (trainingForm) {
+        trainingForm.addEventListener('submit', startTraining);
     }
 }
 
@@ -802,3 +809,247 @@ async function handleUploadCameraPhoto(e) {
     }
 }
 
+
+// ==================== TRAINING SECTION ====================
+
+// Start training
+async function startTraining(e) {
+    e.preventDefault();
+    
+    const form = e.target;
+    const formData = new FormData(form);
+    
+    const trainingData = {
+        epochs: parseInt(formData.get('epochs')),
+        batch_size: parseInt(formData.get('batch_size')),
+        validation_split: parseFloat(formData.get('validation_split')),
+        continue_training: formData.get('continue_training') === 'true'
+    };
+    
+    const messageEl = document.getElementById('trainingMessage');
+    const startBtn = document.getElementById('startTrainingBtn');
+    const progressCard = document.getElementById('trainingProgressCard');
+    const resultsCard = document.getElementById('trainingResultsCard');
+    
+    // Show progress, hide results
+    progressCard.style.display = 'block';
+    resultsCard.style.display = 'none';
+    
+    // Disable button
+    startBtn.disabled = true;
+    startBtn.innerHTML = '⏳ Training...';
+    
+    // Update progress
+    updateProgress(0, 'Initializing training...');
+    
+    try {
+        showMessage(messageEl, '🚀 Training started...', 'info');
+        updateProgress(10, 'Loading dataset...');
+        
+        const response = await fetch(`${API_BASE}/training/start`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(trainingData)
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            updateProgress(100, 'Training completed!');
+            showMessage(messageEl, '✅ ' + data.message, 'success');
+            displayTrainingResults(data.data);
+            resultsCard.style.display = 'block';
+            
+            // Refresh model status
+            setTimeout(() => {
+                checkModelStatus();
+            }, 1000);
+        } else {
+            updateProgress(0, 'Training failed');
+            showMessage(messageEl, '❌ Error: ' + (data.message || 'Training failed'), 'error');
+            progressCard.style.display = 'none';
+        }
+    } catch (error) {
+        updateProgress(0, 'Training failed');
+        showMessage(messageEl, '❌ Error: ' + error.message, 'error');
+        progressCard.style.display = 'none';
+    } finally {
+        startBtn.disabled = false;
+        startBtn.innerHTML = '🚀 Start Training';
+    }
+}
+
+// Update progress bar
+function updateProgress(percent, text) {
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    
+    if (progressFill) {
+        progressFill.style.width = percent + '%';
+        progressFill.textContent = percent + '%';
+    }
+    
+    if (progressText) {
+        progressText.textContent = text;
+    }
+}
+
+// Display training results
+function displayTrainingResults(stats) {
+    const resultsContainer = document.getElementById('trainingResults');
+    
+    if (!stats) {
+        resultsContainer.innerHTML = '<p>No results available</p>';
+        return;
+    }
+    
+    const accuracyClass = stats.test_accuracy >= 0.9 ? 'success' : 
+                         stats.test_accuracy >= 0.7 ? 'warning' : 'danger';
+    
+    resultsContainer.innerHTML = `
+        <div class="result-item">
+            <div class="label">Test Accuracy</div>
+            <div class="value ${accuracyClass}">${(stats.test_accuracy * 100).toFixed(2)}%</div>
+        </div>
+        <div class="result-item">
+            <div class="label">Test Loss</div>
+            <div class="value">${stats.test_loss.toFixed(4)}</div>
+        </div>
+        <div class="result-item">
+            <div class="label">Training Time</div>
+            <div class="value">${stats.training_time_minutes} min</div>
+        </div>
+        <div class="result-item">
+            <div class="label">Epochs Trained</div>
+            <div class="value">${stats.epochs_trained}</div>
+        </div>
+        <div class="result-item">
+            <div class="label">Total Images</div>
+            <div class="value">${stats.num_data}</div>
+        </div>
+        <div class="result-item">
+            <div class="label">Number of Users</div>
+            <div class="value">${stats.num_classes}</div>
+        </div>
+    `;
+    
+    // Add detailed metrics table
+    if (stats.class_labels && stats.class_labels.length > 0) {
+        resultsContainer.innerHTML += `
+            <div style="grid-column: 1 / -1;">
+                <h3 style="margin: 20px 0 10px 0;">📊 Recognized Users</h3>
+                <p style="color: #6b7280; margin-bottom: 15px;">
+                    Model trained to recognize: ${stats.class_labels.join(', ')}
+                </p>
+            </div>
+        `;
+    }
+}
+
+// Check model status
+async function checkModelStatus() {
+    const statusContainer = document.getElementById('modelStatus');
+    
+    try {
+        statusContainer.innerHTML = '<div class="loading">Loading...</div>';
+        
+        const response = await fetch(`${API_BASE}/training/status`);
+        const data = await response.json();
+        
+        if (response.ok && data.data) {
+            displayModelStatus(data.data);
+        } else {
+            statusContainer.innerHTML = '<p style="color: #ef4444;">Failed to load model status</p>';
+        }
+    } catch (error) {
+        statusContainer.innerHTML = '<p style="color: #ef4444;">Error: ' + error.message + '</p>';
+    }
+}
+
+// Display model status
+function displayModelStatus(status) {
+    const statusContainer = document.getElementById('modelStatus');
+    
+    const statusBadge = status.model_available 
+        ? '<span class="status-badge available">✅ Model Available</span>'
+        : '<span class="status-badge unavailable">❌ No Model</span>';
+    
+    let statusHTML = `
+        <div class="status-grid">
+            <div class="status-item">
+                <div class="label">Model Status</div>
+                <div class="value">${statusBadge}</div>
+            </div>
+    `;
+    
+    if (status.model_available && status.accuracy_metrics) {
+        const metrics = status.accuracy_metrics;
+        const accuracyClass = metrics.test_accuracy >= 0.9 ? 'success' : 
+                             metrics.test_accuracy >= 0.7 ? 'warning' : 'danger';
+        
+        statusHTML += `
+            <div class="status-item">
+                <div class="label">Test Accuracy</div>
+                <div class="value ${accuracyClass}">${(metrics.test_accuracy * 100).toFixed(2)}%</div>
+            </div>
+            <div class="status-item">
+                <div class="label">Epochs Trained</div>
+                <div class="value">${metrics.epochs_trained}</div>
+            </div>
+            <div class="status-item">
+                <div class="label">Last Updated</div>
+                <div class="value">${new Date(metrics.timestamp).toLocaleString()}</div>
+            </div>
+        `;
+        
+        statusHTML += `</div>`;
+        
+        // Add detailed metrics table
+        statusHTML += `
+            <table class="metric-table">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Training Accuracy</td>
+                        <td class="metric-value">${(metrics.training_accuracy * 100).toFixed(2)}%</td>
+                    </tr>
+                    <tr>
+                        <td>Training Loss</td>
+                        <td class="metric-value">${metrics.training_loss.toFixed(4)}</td>
+                    </tr>
+                    <tr>
+                        <td>Validation Accuracy</td>
+                        <td class="metric-value">${(metrics.validation_accuracy * 100).toFixed(2)}%</td>
+                    </tr>
+                    <tr>
+                        <td>Validation Loss</td>
+                        <td class="metric-value">${metrics.validation_loss.toFixed(4)}</td>
+                    </tr>
+                    <tr>
+                        <td>Test Accuracy</td>
+                        <td class="metric-value">${(metrics.test_accuracy * 100).toFixed(2)}%</td>
+                    </tr>
+                    <tr>
+                        <td>Test Loss</td>
+                        <td class="metric-value">${metrics.test_loss.toFixed(4)}</td>
+                    </tr>
+                </tbody>
+            </table>
+        `;
+    } else {
+        statusHTML += `</div>
+            <p style="margin-top: 20px; color: #6b7280;">
+                No trained model available. Start training to create a new model.
+            </p>
+        `;
+    }
+    
+    statusContainer.innerHTML = statusHTML;
+}

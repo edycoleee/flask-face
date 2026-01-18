@@ -3,6 +3,7 @@ from flask_restx import Api
 from app.api.halo import api as halo_ns
 from app.api.users import api as users_ns
 from app.api.photos import api as photos_ns
+from app.api.training import training_ns
 from app.utils.db import init_db
 import os
 
@@ -14,6 +15,7 @@ def create_app():
     api.add_namespace(halo_ns, path="/halo")
     api.add_namespace(users_ns, path="/users")
     api.add_namespace(photos_ns, path="/photos")
+    api.add_namespace(training_ns, path="/training")
 
     # Inisialisasi Database SQLite (Native SQL)
     init_db()
