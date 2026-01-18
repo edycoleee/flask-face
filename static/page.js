@@ -527,19 +527,73 @@ window.addEventListener('click', function(event) {
 let cameraStream = null;
 let capturedImageBlob = null;
 
+// Check browser support for getUserMedia
+function getGetUserMediaFunction() {
+    const navigator_obj = navigator;
+    navigator_obj.getUserMedia = navigator_obj.getUserMedia || 
+                                  navigator_obj.webkitGetUserMedia || 
+                                  navigator_obj.mozGetUserMedia || 
+                                  navigator_obj.msGetUserMedia;
+    
+    // Modern approach - use mediaDevices
+    if (navigator_obj.mediaDevices && navigator_obj.mediaDevices.getUserMedia) {
+        return navigator_obj.mediaDevices.getUserMedia.bind(navigator_obj.mediaDevices);
+    }
+    // Fallback for older browsers
+    else if (navigator_obj.getUserMedia) {
+        return function(constraints) {
+            return new Promise((resolve, reject) => {
+                navigator_obj.getUserMedia(constraints, resolve, reject);
+            });
+        };
+    }
+    // No support
+    else {
+        return null;
+    }
+}
+
 async function startCamera() {
     try {
-        const stream = await navigator.mediaDevices.getUserMedia({
+        const getUserMedia = getGetUserMediaFunction();
+        
+        if (!getUserMedia) {
+            showMessage(
+                document.getElementById('cameraUploadMessage'),
+                '❌ Camera Error: Your browser does not support camera access. Please use Chrome, Firefox, Safari (iOS 14.5+), or Edge.',
+                'error'
+            );
+            return;
+        }
+        
+        // Try with preferred constraints first
+        let constraints = {
             video: { 
                 facingMode: 'user',
                 width: { ideal: 1280 },
                 height: { ideal: 720 }
             },
             audio: false
-        });
+        };
+        
+        let stream;
+        try {
+            stream = await getUserMedia(constraints);
+        } catch (constraintError) {
+            // If constraints fail, try with basic video only
+            console.log('Detailed constraints not supported, trying basic video...');
+            stream = await getUserMedia({ video: true, audio: false });
+        }
         
         const video = document.getElementById('cameraStream');
-        video.srcObject = stream;
+        
+        // Handle both srcObject and createObjectURL for compatibility
+        if ('srcObject' in video) {
+            video.srcObject = stream;
+        } else {
+            video.src = URL.createObjectURL(stream);
+        }
+        
         cameraStream = stream;
         
         video.style.display = 'block';
@@ -550,26 +604,61 @@ async function startCamera() {
         
         // Ensure video plays
         video.onloadedmetadata = function() {
-            video.play();
+            video.play().catch(err => {
+                console.log('Play error:', err);
+            });
         };
+        
+        // For Safari: play immediately
+        const playPromise = video.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                console.log('Auto-play prevented:', error);
+            });
+        }
     } catch (error) {
+        let errorMsg = '❌ Camera Error: ';
+        
+        if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+            errorMsg += 'Camera permission denied. Please enable camera access in browser settings.';
+        } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+            errorMsg += 'No camera device found.';
+        } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+            errorMsg += 'Camera is in use by another application.';
+        } else if (error.name === 'TypeError') {
+            errorMsg += 'getUserMedia failed. Try using HTTPS or a different browser.';
+        } else {
+            errorMsg += error.message || 'Unknown error occurred';
+        }
+        
         showMessage(
             document.getElementById('cameraUploadMessage'),
-            '❌ Camera Error: ' + (error.name === 'NotAllowedError' 
-                ? 'Camera permission denied' 
-                : error.message),
+            errorMsg,
             'error'
         );
+        console.error('Camera access error:', error);
     }
 }
 
 function stopCamera() {
     if (cameraStream) {
-        cameraStream.getTracks().forEach(track => track.stop());
+        // Stop all tracks
+        cameraStream.getTracks().forEach(track => {
+            track.stop();
+        });
         cameraStream = null;
     }
     
     const video = document.getElementById('cameraStream');
+    
+    // Cleanup srcObject and src
+    if ('srcObject' in video) {
+        video.srcObject = null;
+    } else if (video.src) {
+        URL.revokeObjectURL(video.src);
+        video.src = '';
+    }
+    
     video.style.display = 'none';
     document.getElementById('captureContainer').style.display = 'none';
     document.getElementById('startCameraBtn').style.display = 'block';
@@ -578,39 +667,81 @@ function stopCamera() {
 }
 
 function capturePhoto() {
-    const video = document.getElementById('cameraStream');
-    const canvas = document.getElementById('captureCanvas');
-    const ctx = canvas.getContext('2d');
-    
-    // Set canvas size to match video
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    
-    // Draw video frame to canvas
-    ctx.drawImage(video, 0, 0);
-    
-    // Convert to blob
-    canvas.toBlob(function(blob) {
-        capturedImageBlob = blob;
+    try {
+        const video = document.getElementById('cameraStream');
+        const canvas = document.getElementById('captureCanvas');
+        const ctx = canvas.getContext('2d');
         
-        // Show preview
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const preview = document.getElementById('cameraPreview');
-            preview.innerHTML = `
-                <img src="${e.target.result}" alt="Captured Photo">
-                <p style="color: #6b7280; font-size: 14px;">Photo captured successfully!</p>
-            `;
-            document.getElementById('uploadCameraForm').style.display = 'block';
-        };
-        reader.readAsDataURL(blob);
+        // Check if video is actually playing
+        if (video.readyState !== video.HAVE_ENOUGH_DATA) {
+            showMessage(
+                document.getElementById('cameraUploadMessage'),
+                '❌ Camera is not ready yet. Please wait a moment and try again.',
+                'error'
+            );
+            return;
+        }
         
+        // Set canvas size to match video
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        // Check if we got valid dimensions
+        if (canvas.width === 0 || canvas.height === 0) {
+            showMessage(
+                document.getElementById('cameraUploadMessage'),
+                '❌ Camera stream not ready. Try stopping and starting camera again.',
+                'error'
+            );
+            return;
+        }
+        
+        // Draw video frame to canvas
+        ctx.drawImage(video, 0, 0);
+        
+        // Convert to blob
+        canvas.toBlob(
+            function(blob) {
+                if (!blob) {
+                    showMessage(
+                        document.getElementById('cameraUploadMessage'),
+                        '❌ Failed to capture photo. Please try again.',
+                        'error'
+                    );
+                    return;
+                }
+                
+                capturedImageBlob = blob;
+                
+                // Show preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('cameraPreview');
+                    preview.innerHTML = `
+                        <img src="${e.target.result}" alt="Captured Photo">
+                        <p style="color: #6b7280; font-size: 14px;">Photo captured successfully!</p>
+                    `;
+                    document.getElementById('uploadCameraForm').style.display = 'block';
+                };
+                reader.readAsDataURL(blob);
+                
+                showMessage(
+                    document.getElementById('cameraUploadMessage'),
+                    '✅ Photo captured! Ready to upload',
+                    'success'
+                );
+            },
+            'image/jpeg',
+            0.95
+        );
+    } catch (error) {
         showMessage(
             document.getElementById('cameraUploadMessage'),
-            '✅ Photo captured! Ready to upload',
-            'success'
+            '❌ Capture Error: ' + error.message,
+            'error'
         );
-    }, 'image/jpeg', 0.95);
+        console.error('Capture error:', error);
+    }
 }
 
 async function handleUploadCameraPhoto(e) {
