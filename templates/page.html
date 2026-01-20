@@ -21,6 +21,7 @@
                 <button class="tab-btn" data-tab="photos">📸 Photos</button>
                 <button class="tab-btn" data-tab="training">🧠 Training</button>
                 <button class="tab-btn" data-tab="prediction">🔮 Prediction</button>
+                <button class="tab-btn" data-tab="verification">🔐 Verification</button>
             </div>
 
             <!-- USERS SECTION -->
@@ -37,8 +38,11 @@
                             <div class="form-group">
                                 <label for="userEmail">Email</label>
                                 <input type="email" id="userEmail" name="email" placeholder="Enter user email" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Create User</button>
+                            </div>                            <div class="form-group">
+                                <label for="userPassword">Password</label>
+                                <input type="text" id="userPassword" name="password" placeholder="Enter password" required>
+                                <small class="form-help">Password tidak di-encrypt (untuk development)</small>
+                            </div>                            <button type="submit" class="btn btn-primary">Create User</button>
                         </form>
                         <div id="createUserMessage" class="message"></div>
                     </div>
@@ -67,6 +71,11 @@
                                 <div class="form-group">
                                     <label for="editUserEmail">Email</label>
                                     <input type="email" id="editUserEmail" name="email" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="editUserPassword">Password</label>
+                                    <input type="text" id="editUserPassword" name="password" required>
+                                    <small class="form-help">Password tidak di-encrypt (untuk development)</small>
                                 </div>
                                 <button type="submit" class="btn btn-primary">Update User</button>
                             </form>
@@ -129,23 +138,43 @@
                         <!-- Camera Capture -->
                         <div id="cameraUploadTab" class="upload-tab-content">
                             <div class="camera-container">
+                                <!-- Error Message (displayed at top) -->
+                                <div id="cameraErrorMessage" class="camera-error" style="display: none;"></div>
+                                
+                                <!-- Camera Controls -->
                                 <div class="camera-controls">
-                                    <button type="button" class="btn btn-secondary" id="startCameraBtn" onclick="startCamera()">🎥 Start Camera</button>
-                                    <button type="button" class="btn btn-secondary" id="stopCameraBtn" onclick="stopCamera()" style="display: none;">⏹️ Stop Camera</button>
+                                    <button type="button" class="btn btn-secondary" id="startCameraBtn" onclick="openCamera()">🎥 Buka Kamera</button>
+                                    <button type="button" class="btn btn-secondary" id="stopCameraBtn" onclick="closeCamera()" style="display: none;">⏹️ Tutup Kamera</button>
                                 </div>
                                 
-                                <video id="cameraStream" class="camera-stream" style="display: none;"></video>
+                                <!-- Video Stream -->
+                                <div id="videoContainer" class="video-container" style="display: none;">
+                                    <video id="cameraStream" class="camera-stream" autoplay playsinline></video>
+                                    <div class="camera-overlay">
+                                        <div class="camera-frame"></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Hidden Canvas for Capture -->
                                 <canvas id="captureCanvas" style="display: none;"></canvas>
                                 
-                                <div id="captureContainer" style="display: none;">
-                                    <button type="button" class="btn btn-primary btn-large" id="captureBtn" onclick="capturePhoto()">📸 Capture Photo</button>
+                                <!-- Capture Button (shown when camera active) -->
+                                <div id="captureContainer" class="capture-controls" style="display: none;">
+                                    <button type="button" class="btn btn-primary btn-large" id="captureBtn" onclick="captureImage()">📸 Ambil Foto</button>
                                 </div>
                                 
+                                <!-- Captured Image Preview -->
                                 <div id="cameraPreview" class="preview-container"></div>
                                 
+                                <!-- Upload Form (shown after capture) -->
                                 <form id="uploadCameraForm" class="form" style="display: none;">
-                                    <button type="submit" class="btn btn-primary">Upload Captured Photo</button>
+                                    <div class="form-actions">
+                                        <button type="submit" class="btn btn-primary">✅ Upload Foto</button>
+                                        <button type="button" class="btn btn-secondary" onclick="retakePhoto()">🔄 Ambil Ulang</button>
+                                    </div>
                                 </form>
+                                
+                                <!-- Status Message -->
                                 <div id="cameraUploadMessage" class="message"></div>
                             </div>
                         </div>
@@ -285,23 +314,43 @@
                         <!-- Camera Capture for Prediction -->
                         <div id="predictCameraTab" class="upload-tab-content">
                             <div class="camera-container">
+                                <!-- Error Message -->
+                                <div id="predictCameraErrorMessage" class="camera-error" style="display: none;"></div>
+                                
+                                <!-- Camera Controls -->
                                 <div class="camera-controls">
-                                    <button type="button" class="btn btn-secondary" id="startPredictCameraBtn" onclick="startPredictCamera()">🎥 Start Camera</button>
-                                    <button type="button" class="btn btn-secondary" id="stopPredictCameraBtn" onclick="stopPredictCamera()" style="display: none;">⏹️ Stop Camera</button>
+                                    <button type="button" class="btn btn-secondary" id="startPredictCameraBtn" onclick="openPredictCamera()">🎥 Buka Kamera</button>
+                                    <button type="button" class="btn btn-secondary" id="stopPredictCameraBtn" onclick="closePredictCamera()" style="display: none;">⏹️ Tutup Kamera</button>
                                 </div>
                                 
-                                <video id="predictCameraStream" class="camera-stream" style="display: none;"></video>
+                                <!-- Video Stream -->
+                                <div id="predictVideoContainer" class="video-container" style="display: none;">
+                                    <video id="predictCameraStream" class="camera-stream" autoplay playsinline></video>
+                                    <div class="camera-overlay">
+                                        <div class="camera-frame"></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Hidden Canvas -->
                                 <canvas id="predictCaptureCanvas" style="display: none;"></canvas>
                                 
-                                <div id="predictCaptureContainer" style="display: none;">
-                                    <button type="button" class="btn btn-primary btn-large" id="predictCaptureBtn" onclick="capturePredictPhoto()">📸 Capture Photo</button>
+                                <!-- Capture Button -->
+                                <div id="predictCaptureContainer" class="capture-controls" style="display: none;">
+                                    <button type="button" class="btn btn-primary btn-large" id="predictCaptureBtn" onclick="capturePredictImage()">📸 Ambil Foto</button>
                                 </div>
                                 
+                                <!-- Captured Image Preview -->
                                 <div id="predictCameraPreview" class="preview-container"></div>
                                 
+                                <!-- Predict Form -->
                                 <form id="predictCameraForm" class="form" style="display: none;">
-                                    <button type="submit" class="btn btn-primary btn-large">🔍 Predict Face</button>
+                                    <div class="form-actions">
+                                        <button type="submit" class="btn btn-primary btn-large">🔍 Prediksi Wajah</button>
+                                        <button type="button" class="btn btn-secondary" onclick="retakePredictPhoto()">🔄 Ambil Ulang</button>
+                                    </div>
                                 </form>
+                                
+                                <!-- Status Message -->
                                 <div id="predictCameraMessage" class="message"></div>
                             </div>
                         </div>
@@ -311,6 +360,135 @@
                     <div class="card" id="predictionResultsCard" style="display: none;">
                         <h2>📊 Prediction Results</h2>
                         <div id="predictionResults" class="prediction-results">
+                            <!-- Results will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VERIFICATION SECTION (1:1) -->
+            <section id="verification-tab" class="tab-content">
+                <div class="section-container">
+                    <!-- Info Card -->
+                    <div class="card info-card">
+                        <h2>🔐 Face Verification (1:1)</h2>
+                        <p class="card-description">
+                            <strong>Verification Mode:</strong> Verifikasi apakah wajah cocok dengan user tertentu.<br>
+                            <strong>Input:</strong> Email/User ID + Foto wajah<br>
+                            <strong>Process:</strong> Verify apakah foto cocok dengan user yang diklaim (1:1 comparison)<br>
+                            <strong>Speed:</strong> ⚡ Lebih cepat dari Prediction (constant time ~1.2s)
+                        </p>
+                    </div>
+
+                    <!-- Step 1: Email Lookup -->
+                    <div class="card">
+                        <h2>📧 Step 1: Masukkan Email</h2>
+                        <p class="card-description">Masukkan email untuk lookup User ID</p>
+                        
+                        <form id="verifyEmailForm" class="form">
+                            <div class="form-group">
+                                <label for="verifyEmail">Email Address</label>
+                                <input type="email" id="verifyEmail" name="email" placeholder="john@example.com" required>
+                                <small class="form-help">Email yang terdaftar di sistem</small>
+                            </div>
+                            <button type="submit" class="btn btn-primary">🔍 Lookup User</button>
+                        </form>
+                        <div id="emailLookupMessage" class="message"></div>
+                        
+                        <!-- User Info Display -->
+                        <div id="userInfoDisplay" style="display: none; margin-top: 20px;">
+                            <div class="user-info-box">
+                                <h3>✅ User Found</h3>
+                                <div class="user-details-grid">
+                                    <div class="detail-item">
+                                        <span class="label">User ID:</span>
+                                        <span class="value" id="foundUserId">-</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="label">Name:</span>
+                                        <span class="value" id="foundUserName">-</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="label">Email:</span>
+                                        <span class="value" id="foundUserEmail">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Face Verification -->
+                    <div class="card" id="verifyFaceSection" style="display: none;">
+                        <h2>📸 Step 2: Verifikasi Wajah</h2>
+                        <p class="card-description">Upload atau capture foto untuk verifikasi identitas</p>
+                        
+                        <div class="upload-tabs">
+                            <button class="upload-tab-btn active" data-upload-tab="verifyUpload">📤 Upload Photo</button>
+                            <button class="upload-tab-btn" data-upload-tab="verifyCamera">📷 Capture from Camera</button>
+                        </div>
+
+                        <!-- Upload Photo for Verification -->
+                        <div id="verifyUploadTab" class="upload-tab-content active">
+                            <form id="verifyUploadForm" class="form">
+                                <div class="form-group">
+                                    <label for="verifyPhotoFile">Select Photo (JPG/PNG)</label>
+                                    <input type="file" id="verifyPhotoFile" name="file" accept="image/jpeg,image/png" required>
+                                </div>
+                                <div class="preview-container" id="verifyUploadPreview"></div>
+                                <button type="submit" class="btn btn-primary btn-large">🔐 Verify Face</button>
+                            </form>
+                            <div id="verifyUploadMessage" class="message"></div>
+                        </div>
+
+                        <!-- Camera Capture for Verification -->
+                        <div id="verifyCameraTab" class="upload-tab-content">
+                            <div class="camera-container">
+                                <!-- Error Message -->
+                                <div id="verifyCameraErrorMessage" class="camera-error" style="display: none;"></div>
+                                
+                                <!-- Camera Controls -->
+                                <div class="camera-controls">
+                                    <button type="button" class="btn btn-secondary" id="startVerifyCameraBtn" onclick="openVerifyCamera()">🎥 Buka Kamera</button>
+                                    <button type="button" class="btn btn-secondary" id="stopVerifyCameraBtn" onclick="closeVerifyCamera()" style="display: none;">⏹️ Tutup Kamera</button>
+                                </div>
+                                
+                                <!-- Video Stream -->
+                                <div id="verifyVideoContainer" class="video-container" style="display: none;">
+                                    <video id="verifyCameraStream" class="camera-stream" autoplay playsinline></video>
+                                    <div class="camera-overlay">
+                                        <div class="camera-frame"></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Hidden Canvas -->
+                                <canvas id="verifyCaptureCanvas" style="display: none;"></canvas>
+                                
+                                <!-- Capture Button -->
+                                <div id="verifyCaptureContainer" class="capture-controls" style="display: none;">
+                                    <button type="button" class="btn btn-primary btn-large" id="verifyCaptureBtn" onclick="captureVerifyImage()">📸 Ambil Foto</button>
+                                </div>
+                                
+                                <!-- Captured Image Preview -->
+                                <div id="verifyCameraPreview" class="preview-container"></div>
+                                
+                                <!-- Verify Form -->
+                                <form id="verifyCameraForm" class="form" style="display: none;">
+                                    <div class="form-actions">
+                                        <button type="submit" class="btn btn-primary btn-large">🔐 Verify Face</button>
+                                        <button type="button" class="btn btn-secondary" onclick="retakeVerifyPhoto()">🔄 Ambil Ulang</button>
+                                    </div>
+                                </form>
+                                
+                                <!-- Status Message -->
+                                <div id="verifyCameraMessage" class="message"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Verification Results -->
+                    <div class="card" id="verificationResultsCard" style="display: none;">
+                        <h2>📊 Verification Results</h2>
+                        <div id="verificationResults" class="verification-results">
                             <!-- Results will be populated here -->
                         </div>
                     </div>

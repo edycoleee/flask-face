@@ -11,7 +11,7 @@ class UserService:
     @staticmethod
     def get_all_users():
         conn = get_db_connection()
-        rows = conn.execute("SELECT * FROM users").fetchall()
+        rows = conn.execute("SELECT id, name, email, password FROM users").fetchall()
         conn.close()
         # Mengembalikan list of dict agar sesuai dengan marshal_with di API
         return [dict(row) for row in rows]
@@ -19,16 +19,19 @@ class UserService:
     @staticmethod
     def get_user(user_id):
         conn = get_db_connection()
-        row = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+        row = conn.execute("SELECT id, name, email, password FROM users WHERE id = ?", (user_id,)).fetchone()
         conn.close()
         return dict(row) if row else None
 
     @staticmethod
-    def create_user(name, email):
+    def create_user(name, email, password):
         conn = get_db_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("INSERT INTO users (name, email) VALUES (?, ?)", (name, email))
+            cursor.execute(
+                "INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
+                (name, email, password)
+            )
             user_id = cursor.lastrowid
             conn.commit()
 
@@ -37,7 +40,7 @@ class UserService:
             os.makedirs(folder_path, exist_ok=True)
             
             logger.info(f"User created: {user_id} - folder created at {folder_path}")
-            return {"id": user_id, "name": name, "email": email}, None
+            return {"id": user_id, "name": name, "email": email, "password": password}, None
         except sqlite3.IntegrityError as e:
             logger.error(f"Integrity Error: {str(e)}")
             return None, "Email sudah terdaftar!"
@@ -45,20 +48,20 @@ class UserService:
             conn.close()
 
     @staticmethod
-    def update_user(user_id, name, email):
+    def update_user(user_id, name, email, password):
         conn = get_db_connection()
         try:
             cursor = conn.cursor()
             cursor.execute(
-                "UPDATE users SET name = ?, email = ? WHERE id = ?",
-                (name, email, user_id)
+                "UPDATE users SET name = ?, email = ?, password = ? WHERE id = ?",
+                (name, email, password, user_id)
             )
             if cursor.rowcount == 0:
                 return None, "User tidak ditemukan"
             
             conn.commit()
             logger.info(f"User updated: {user_id}")
-            return {"id": user_id, "name": name, "email": email}, None
+            return {"id": user_id, "name": name, "email": email, "password": password}, None
         except sqlite3.IntegrityError:
             return None, "Email baru sudah digunakan oleh user lain!"
         finally:

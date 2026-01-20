@@ -8,7 +8,8 @@ api = Namespace("users", description="User CRUD Operations")
 user_response_model = api.model("UserResponse", {
     "id": fields.Integer(readonly=True),
     "name": fields.String(required=True),
-    "email": fields.String(required=True)
+    "email": fields.String(required=True),
+    "password": fields.String(required=True)
 })
 
 @api.route("")
@@ -20,7 +21,11 @@ class UserList(Resource):
     @api.expect(user_response_model, validate=True)
     def post(self):
         data = request.json
-        user, error = UserService.create_user(data["name"], data["email"])
+        user, error = UserService.create_user(
+            data["name"],
+            data["email"],
+            data["password"]
+        )
         if error:
             return {"message": error}, 400
         return user, 201
@@ -37,7 +42,12 @@ class UserItem(Resource):
     @api.expect(user_response_model)
     def put(self, id):
         data = request.json
-        user, error = UserService.update_user(id, data["name"], data["email"])
+        user, error = UserService.update_user(
+            id,
+            data["name"],
+            data["email"],
+            data["password"]
+        )
         if error:
             return {"message": error}, 400
         return user

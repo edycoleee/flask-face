@@ -41,3 +41,4 @@ dataset/
 models/model.h5
 models/label_map.json
 models/accuracy.json
+data/

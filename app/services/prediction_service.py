@@ -60,12 +60,47 @@ class PredictionService:
                 self.label_map = json.load(f)
             logger.info(f"✓ Label map loaded: {len(self.label_map)} classes")
             
+            # Validate that all users in label_map exist in database
+            self._validate_label_map()
+            
             self.is_loaded = True
             return True
             
         except Exception as e:
             logger.error(f"Failed to load model: {str(e)}", exc_info=True)
             raise
+    
+    def _validate_label_map(self):
+        """Validate that all users in label_map exist in database"""
+        conn = get_db_connection()
+        
+        # Get all valid user IDs from database
+        valid_users = conn.execute("SELECT id FROM users").fetchall()
+        valid_ids = {str(row['id']) for row in valid_users}
+        
+        # Check label_map users
+        model_users = set(self.label_map.values())
+        
+        # Find users in model but not in database
+        orphaned_users = model_users - valid_ids
+        
+        conn.close()
+        
+        if orphaned_users:
+            error_msg = (
+                f"❌ MODEL-DATABASE MISMATCH DETECTED!\n"
+                f"Model has users that don't exist in database: {', '.join(sorted(orphaned_users))}\n"
+                f"Database users: {', '.join(sorted(valid_ids))}\n"
+                f"Model users: {', '.join(sorted(model_users))}\n\n"
+                f"This happens when:\n"
+                f"1. Users were deleted after model training\n"
+                f"2. Model was trained with orphaned dataset folders\n\n"
+                f"SOLUTION: Retrain the model\n"
+                f"1. Verify dataset: python verify_dataset.py\n"
+                f"2. Retrain model: POST /api/training/start"
+            )
+            logger.error(error_msg)
+            raise ValueError(error_msg)
     
     def preprocess_image(self, image_path):
         """Preprocess image untuk prediction"""

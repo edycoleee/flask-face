@@ -51,6 +51,51 @@ class TrainingService:
         self.history = None
         self.training_stats = {}
     
+    def _validate_dataset(self):
+        """Validate dataset matches database users"""
+        import sqlite3
+        
+        # Get valid user IDs from database
+        db_path = Path('instance') / 'app.db'
+        if not db_path.exists():
+            logger.warning("Database not found, skipping validation")
+            return
+        
+        conn = sqlite3.connect(str(db_path))
+        cursor = conn.cursor()
+        cursor.execute("SELECT id FROM users ORDER BY id")
+        valid_ids = {str(row[0]) for row in cursor.fetchall()}
+        conn.close()
+        
+        # Get dataset folders
+        if not self.dataset_dir.exists():
+            raise FileNotFoundError(f"Dataset directory not found: {self.dataset_dir}")
+        
+        dataset_folders = {f.name for f in self.dataset_dir.iterdir() 
+                          if f.is_dir() and f.name.isdigit()}
+        
+        # Check for orphaned folders
+        orphaned = dataset_folders - valid_ids
+        missing = valid_ids - dataset_folders
+        
+        logger.info(f"Database users: {len(valid_ids)}")
+        logger.info(f"Dataset folders: {len(dataset_folders)}")
+        
+        if orphaned:
+            error_msg = (
+                f"❌ ORPHANED FOLDERS DETECTED: {', '.join(sorted(orphaned))}\n"
+                f"These folders don't have matching users in database.\n"
+                f"This will cause training to fail with wrong number of classes.\n"
+                f"Run: python cleanup_dataset.py to fix this issue."
+            )
+            logger.error(error_msg)
+            raise ValueError(error_msg)
+        
+        if missing:
+            logger.warning(f"Missing folders for users: {', '.join(sorted(missing))}")
+        
+        logger.info("✓ Dataset validation passed")
+    
     def load_dataset(self):
         """Load semua gambar dari dataset folder"""
         images = []
@@ -186,6 +231,12 @@ class TrainingService:
         
         try:
             start_time = time.time()
+            
+            # Validate dataset before training
+            logger.info("=" * 50)
+            logger.info("VALIDATING DATASET")
+            logger.info("=" * 50)
+            self._validate_dataset()
             
             # Load dataset
             logger.info("=" * 50)

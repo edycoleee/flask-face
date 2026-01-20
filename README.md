@@ -309,3 +309,17 @@ Akses UI lengkap di: `http://localhost:5000`
 - **COMPLETE_WORKFLOW_GUIDE.md** - Full workflow dari A-Z
 
 ---
+ 
+DATASET
+
+https://www.kaggle.com/datasets/olgabelitskaya/yale-face-database
+
+rename file karena butuh gif
+
+```
+for f in *.*; do mv "$f" "$f.gif"; done
+
+for %f in (*.*) do ren "%f" "%f.gif"
+
+
+```
