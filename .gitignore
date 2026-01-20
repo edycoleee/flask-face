@@ -35,3 +35,10 @@ creds.py # Example sensitive data file
 # OS-generated files
 .DS_Store
 Thumbs.db
+
+# Dataset and trained models (jangan upload ke GitHub)
+dataset/
+models/model.h5
+models/label_map.json
+models/accuracy.json
+data/
