@@ -323,3 +323,137 @@ for %f in (*.*) do ren "%f" "%f.gif"
 
 
 ```
+
+### API SPECIFICATION
+
+Berikut adalah **tabel lengkap semua API endpoints** dengan method, request, dan response:
+
+---
+
+## 📋 Complete API Reference
+
+### 👥 **Users API**
+
+| Endpoint | Method | Request Body | Request Type | Response | Status Code |
+|---------|--------|--------------|--------------|----------|-------------|
+| `/api/users` | **POST** | `{ "name": "string", "email": "string", "password": "string" }` | `application/json` | `{ "id": 1, "name": "John", "email": "john@email.com", "password": "pass123" }` | `201 Created` |
+| `/api/users` | **GET** | – | – | `[ { "id": 1, "name": "John", "email": "john@email.com", "password": "pass123" } ]` | `200 OK` |
+| `/api/users/<id>` | **GET** | – | – | `{ "id": 1, "name": "John", "email": "john@email.com", "password": "pass123" }` | `200 OK` / `404 Not Found` |
+| `/api/users/<id>` | **PUT** | `{ "name": "string", "email": "string", "password": "string" }` | `application/json` | `{ "id": 1, "name": "John Updated", "email": "new@email.com", "password": "newpass" }` | `200 OK` / `404 Not Found` |
+| `/api/users/<id>` | **DELETE** | – | – | `{ "message": "User deleted successfully" }` | `200 OK` / `404 Not Found` |
+| `/api/users/email/<email>` | **GET** | – | – | `{ "id": 1, "name": "John", "email": "john@email.com" }` | `200 OK` / `404 Not Found` |
+
+---
+
+### 📸 **Photos API**
+
+| Endpoint | Method | Request Body | Request Type | Response | Status Code |
+|---------|--------|--------------|--------------|----------|-------------|
+| `/api/photos/<user_id>/upload` | **POST** | `file: image` | `multipart/form-data` | `{ "id": 1, "user_id": 1, "filename": "photo.jpg", "filepath": "dataset/1/photo.jpg", "width": 224, "height": 224, "created_at": "2026-01-20T10:00:00" }` | `201 Created` / `400 Bad Request` |
+| `/api/photos/<user_id>/upload/multiple` | **POST** | `files[]: image[]` | `multipart/form-data` | `{ "uploaded": 5, "files": [ {...}, {...} ] }` | `201 Created` / `400 Bad Request` |
+| `/api/photos/<user_id>` | **GET** | – | – | `[ { "id": 1, "filename": "photo.jpg", "width": 224, "height": 224, "created_at": "..." } ]` | `200 OK` |
+| `/api/photos/<user_id>/<photo_id>` | **DELETE** | – | – | `{ "message": "Photo deleted successfully" }` | `200 OK` / `404 Not Found` |
+| `/api/photos/<user_id>/<photo_id>/view` | **GET** | – | – | Image file (binary) | `200 OK` / `404 Not Found` |
+
+---
+
+### 🎓 **Training API**
+
+| Endpoint | Method | Request Body | Request Type | Response | Status Code |
+|---------|--------|--------------|--------------|----------|-------------|
+| `/api/training/start` | **POST** | `{ "epochs": 50, "batch_size": 16, "validation_split": 0.2, "continue_training": false }` | `application/json` | `{ "status": "success", "message": "Training completed", "accuracy": 0.95, "epochs": 50, "num_classes": 3, "training_time": 45.2 }` | `200 OK` / `500 Error` |
+| `/api/training/status` | **GET** | – | – | `{ "training_active": false, "model_exists": true }` | `200 OK` |
+| `/api/training/info` | **GET** | – | – | `{ "test_accuracy": 0.95, "epochs": 50, "num_classes": 3, "timestamp": "2026-01-20T10:00:00" }` | `200 OK` / `404 Not Found` |
+
+---
+
+### 🔮 **Prediction API**
+
+| Endpoint | Method | Request Body | Request Type | Response | Status Code |
+|---------|--------|--------------|--------------|----------|-------------|
+| `/api/face/predict` | **POST** | `file: image` | `multipart/form-data` | `{ "status": "success", "data": { "user_id": 2, "name": "John", "email": "john@email.com", "confidence": 98.5, "all_predictions": [ {...} ] } }` | `200 OK` / `404 Model Not Found` |
+| `/api/face/model-info` | **GET** | – | – | `{ "loaded": true, "num_classes": 3, "accuracy": 0.95, "model_path": "models/model.h5" }` | `200 OK` / `404 Not Found` |
+
+---
+
+### 🔐 **Authentication API**
+
+| Endpoint | Method | Request Body | Request Type | Response | Status Code |
+|---------|--------|--------------|--------------|----------|-------------|
+| `/api/auth/login-face` | **POST** | `file: image` | `multipart/form-data` | `{ "status": "success", "message": "Login successful", "data": { "user_id": 2, "name": "John", "email": "john@email.com", "token": "550e8400-e29b-41d4...", "confidence": 98.5, "expires_at": "2026-01-21T10:00:00" } }` | `200 OK` / `401 Unauthorized` |
+| `/api/auth/login-face-verify` | **POST** | `user_id: integer` + `file: image` | `multipart/form-data` | `{ "status": "success", "message": "Face verification successful", "data": { "match": true, "user_id": 2, "name": "John", "token": "550e8400...", "confidence": 98.5 } }` | `200 OK` / `403 Forbidden` |
+| `/api/auth/login-pass-verify` | **POST** | `{ "email": "string", "password": "string" }` | `application/json` | `{ "status": "success", "message": "Login successful", "data": { "user_id": 2, "name": "John", "email": "john@email.com", "token": "550e8400...", "expires_at": "2026-01-21T10:00:00" } }` | `200 OK` / `401 Unauthorized` |
+| `/api/auth/verify` | **POST** | `{ "token": "uuid-string" }` | `application/json` | `{ "status": "success", "message": "Token is valid", "data": { "user_id": 2, "name": "John", "email": "john@email.com", "confidence": 98.5, "created_at": "...", "expires_at": "..." } }` | `200 OK` / `401 Invalid` |
+| `/api/auth/logout` | **POST** | `{ "token": "uuid-string" }` | `application/json` | `{ "status": "success", "message": "Logout successful" }` | `200 OK` / `500 Error` |
+| `/api/auth/tokens/<user_id>` | **GET** | – | – | `{ "status": "success", "message": "Found 2 active tokens", "data": [ { "token": "...", "confidence": 98.5, "created_at": "...", "expires_at": "..." } ] }` | `200 OK` |
+
+---
+
+## 📊 API Categories Summary
+
+| Category | Endpoints | Description |
+|---------|-----------|-------------|
+| **Users** | 6 endpoints | User CRUD + email lookup |
+| **Photos** | 5 endpoints | Photo upload & management |
+| **Training** | 3 endpoints | Model training & status |
+| **Prediction** | 2 endpoints | Face recognition |
+| **Authentication** | 6 endpoints | Face login + token management |
+| **TOTAL** | **22 endpoints** | Complete face recognition system |
+
+---
+
+## 🔑 Authentication Methods
+
+| Method | Type | Speed | Use Case | Endpoint |
+|--------|------|-------|----------|----------|
+| **Face Recognition** | 1:N | Slow (O(N)) | "Siapa kamu?" | `/api/auth/login-face` |
+| **Face Verification** | 1:1 | Fast (O(1)) ⚡ | "Apakah kamu John?" | `/api/auth/login-face-verify` |
+| **Password Login** | Credential | Instant | Traditional login | `/api/auth/login-pass-verify` |
+
+**Recommended**: Use **Face Verification (1:1)** for best performance and accuracy.
+
+---
+
+## 📝 Common Request/Response Examples
+
+### Create User with Password
+```bash
+curl -X POST http://localhost:5000/api/users \
+  -H "Content-Type: application/json" \
+  -d '{"name": "John Doe", "email": "john@email.com", "password": "secure123"}'
+```
+
+### Upload Photo
+```bash
+curl -X POST http://localhost:5000/api/photos/1/upload \
+  -F "file=@photo.jpg"
+```
+
+### Train Model
+```bash
+curl -X POST http://localhost:5000/api/training/start \
+  -H "Content-Type: application/json" \
+  -d '{"epochs": 50, "batch_size": 16}'
+```
+
+### Face Prediction
+```bash
+curl -X POST http://localhost:5000/api/face/predict \
+  -F "file=@test_face.jpg"
+```
+
+### Password Login
+```bash
+curl -X POST http://localhost:5000/api/auth/login-pass-verify \
+  -H "Content-Type: application/json" \
+  -d '{"email": "john@email.com", "password": "secure123"}'
+```
+
+### Face Verification Login (Recommended)
+```bash
+curl -X POST http://localhost:5000/api/auth/login-face-verify \
+  -F "user_id=2" \
+  -F "file=@face.jpg"
+```
+
+---

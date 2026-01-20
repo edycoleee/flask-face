@@ -25,6 +25,12 @@ verify_login_parser.add_argument('user_id', location='form', type=int, required=
 verify_login_parser.add_argument('file', location='files', type=FileStorage, required=True,
                                 help='Face image untuk verification')
 
+# Password login model
+password_login_model = api.model("PasswordLogin", {
+    "email": fields.String(required=True, description='Email user', example='user@example.com'),
+    "password": fields.String(required=True, description='Password user', example='password123')
+})
+
 # Token verification model
 verify_model = api.model("VerifyToken", {
     "token": fields.String(required=True, description='UUID token', example='550e8400-e29b-41d4-a716-446655440000')
@@ -300,6 +306,90 @@ class FaceLoginVerify(Resource):
             return {
                 "status": "error",
                 "message": "Verification failed",
+                "error": str(e)
+            }, 500
+
+
+@api.route("/login-pass-verify")
+class PasswordLogin(Resource):
+    @api.expect(password_login_model)
+    def post(self):
+        """
+        Login dengan email dan password (Traditional Authentication)
+        
+        Metode login tradisional menggunakan kredensial email & password.
+        Cocok sebagai fallback method jika face authentication gagal.
+        
+        Process:
+        1. User input email dan password
+        2. Verify credentials dengan database
+        3. Jika valid → generate UUID token
+        4. Return token untuk authentication
+        
+        Input:
+            - email: Email user (string)
+            - password: Password user (string)
+        
+        Returns:
+            - user_id, name, email
+            - token: UUID token untuk authentication
+            - expires_at: Token expiry time
+        
+        Keuntungan:
+        - 🔐 Standard & reliable
+        - 💻 Tidak perlu kamera
+        - ⚡ Instant verification
+        - 🔄 Good fallback method
+        """
+        try:
+            logger.info("=" * 50)
+            logger.info("PASSWORD LOGIN REQUEST")
+            logger.info("=" * 50)
+            
+            payload = api.payload
+            email = payload.get('email')
+            password = payload.get('password')
+            
+            if not email:
+                return {
+                    "status": "error",
+                    "message": "Email is required"
+                }, 400
+            
+            if not password:
+                return {
+                    "status": "error",
+                    "message": "Password is required"
+                }, 400
+            
+            logger.info(f"Login attempt for email: {email}")
+            
+            # Login with password
+            result = auth_service.login_with_password(email, password)
+            
+            if result['success']:
+                return {
+                    "status": "success",
+                    "message": "Login successful",
+                    "data": {
+                        "user_id": result['user_id'],
+                        "name": result['name'],
+                        "email": result['email'],
+                        "token": result['token'],
+                        "expires_at": result['expires_at']
+                    }
+                }, 200
+            else:
+                return {
+                    "status": "error",
+                    "message": result['message']
+                }, 401
+                
+        except Exception as e:
+            logger.error(f"Password login error: {str(e)}", exc_info=True)
+            return {
+                "status": "error",
+                "message": "Login failed",
                 "error": str(e)
             }, 500
 

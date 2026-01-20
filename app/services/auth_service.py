@@ -347,6 +347,98 @@ class AuthService:
         except Exception as e:
             logger.error(f"Face verification failed: {str(e)}", exc_info=True)
             raise
+    
+    def login_with_password(self, email, password):
+        """
+        Login menggunakan email dan password
+        
+        Args:
+            email: Email user
+            password: Password user
+            
+        Returns:
+            dict: {
+                'success': bool,
+                'user_id': int,
+                'name': str,
+                'email': str,
+                'token': str,
+                'expires_at': str
+            }
+        """
+        try:
+            logger.info("=" * 50)
+            logger.info("PASSWORD LOGIN ATTEMPT")
+            logger.info("=" * 50)
+            logger.info(f"Email: {email}")
+            
+            # Get user from database
+            conn = get_db_connection()
+            user = conn.execute(
+                "SELECT id, name, email, password FROM users WHERE email = ?",
+                (email,)
+            ).fetchone()
+            conn.close()
+            
+            if not user:
+                logger.warning(f"❌ User not found: {email}")
+                return {
+                    'success': False,
+                    'message': 'Invalid email or password'
+                }
+            
+            user_data = dict(user)
+            
+            # Verify password
+            if user_data['password'] != password:
+                logger.warning(f"❌ Password mismatch for user: {email}")
+                return {
+                    'success': False,
+                    'message': 'Invalid email or password'
+                }
+            
+            logger.info(f"✓ Password verified for: {user_data['name']} (ID: {user_data['id']})")
+            
+            # Generate UUID token
+            token = str(uuid.uuid4())
+            logger.info(f"✓ Generating token: {token}")
+            
+            # Calculate expiry
+            created_at = datetime.now()
+            expires_at = created_at + timedelta(hours=self.token_expiry_hours)
+            
+            # Save token to database (confidence = 100.0 for password login)
+            conn = get_db_connection()
+            try:
+                conn.execute('''
+                    INSERT INTO auth_tokens (user_id, token, confidence, expires_at)
+                    VALUES (?, ?, ?, ?)
+                ''', (user_data['id'], token, 100.0, expires_at.isoformat()))
+                conn.commit()
+                logger.info("✓ Token saved to database")
+            finally:
+                conn.close()
+            
+            logger.info("=" * 50)
+            logger.info("✅ LOGIN SUCCESSFUL")
+            logger.info(f"User: {user_data['name']} (ID: {user_data['id']})")
+            logger.info(f"Token: {token}")
+            logger.info(f"Expires: {expires_at.isoformat()}")
+            logger.info("=" * 50)
+            
+            return {
+                'success': True,
+                'user_id': user_data['id'],
+                'name': user_data['name'],
+                'email': user_data['email'],
+                'token': token,
+                'created_at': created_at.isoformat(),
+                'expires_at': expires_at.isoformat()
+            }
+            
+        except Exception as e:
+            logger.error(f"Password login failed: {str(e)}", exc_info=True)
+            raise
 
 
 # Global instance
