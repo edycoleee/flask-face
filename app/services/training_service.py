@@ -128,7 +128,7 @@ class TrainingService:
                 for img_file in image_files:
                     try:
                         # Load and preprocess image
-                        img = load_img(str(img_file), target_size=(224, 224))
+                        img = load_img(str(img_file), target_size=(300, 300))
                         img_array = img_to_array(img)
                         img_array = img_array / 255.0  # Normalize
                         
@@ -161,44 +161,81 @@ class TrainingService:
         return images, labels_encoded, num_classes
     
     def build_model(self, num_classes):
-        """Build CNN model untuk face recognition menggunakan MobileNetV2 (pre-trained)"""
-        logger.info("Building MobileNetV2 model with transfer learning...")
+        """Build CNN model untuk face recognition dengan architecture yang lebih akurat"""
+        logger.info("Building improved face recognition model...")
         
-        # Load MobileNetV2 pre-trained on ImageNet
-        base_model = keras.applications.MobileNetV2(
-            input_shape=(224, 224, 3),
+        # Load EfficientNetB3 (Top-1 accuracy 81.6% vs B0 77.1%)
+        # Input size 300x300 untuk detail lebih baik
+        base_model = keras.applications.EfficientNetB3(
+            input_shape=(300, 300, 3),
             include_top=False,
-            weights='imagenet'
+            weights='imagenet',
+            pooling=None  # We'll add custom pooling
         )
         
-        # Freeze base model layers untuk transfer learning yang lebih efisien
-        # Hanya train layers terakhir untuk adaptasi ke dataset kita
+        # Fine-tuning strategy: Unfreeze top layers untuk better accuracy
+        # Freeze semua layers dulu
         base_model.trainable = False
         
-        # Build model dengan custom classification head
+        # Unfreeze top 30 layers untuk fine-tuning (lebih banyak karena B3 lebih dalam)
+        # Ini akan memberikan model kemampuan untuk adapt ke face dataset kita
+        for layer in base_model.layers[-30:]:
+            layer.trainable = True
+        
+        logger.info(f"  Base model: EfficientNetB3 (ImageNet weights)")
+        logger.info(f"  Total layers: {len(base_model.layers)}")
+        logger.info(f"  Trainable layers: {sum([1 for l in base_model.layers if l.trainable])}")
+        
+        # Build model dengan deeper classification head untuk better feature extraction
         model = models.Sequential([
+            # Base model
             base_model,
+            
+            # Global pooling
             layers.GlobalAveragePooling2D(),
+            
+            # First dense block - extract high-level features
+            layers.Dense(512, kernel_regularizer=keras.regularizers.l2(0.01)),
             layers.BatchNormalization(),
+            layers.Activation('relu'),
             layers.Dropout(0.5),
-            layers.Dense(128, activation='relu'),
+            
+            # Second dense block - refine features
+            layers.Dense(256, kernel_regularizer=keras.regularizers.l2(0.01)),
             layers.BatchNormalization(),
+            layers.Activation('relu'),
+            layers.Dropout(0.4),
+            
+            # Third dense block - face-specific features
+            layers.Dense(128, kernel_regularizer=keras.regularizers.l2(0.01)),
+            layers.BatchNormalization(),
+            layers.Activation('relu'),
             layers.Dropout(0.3),
+            
+            # Output layer
             layers.Dense(num_classes, activation='softmax')
         ])
         
-        # Compile dengan learning rate yang optimal untuk transfer learning
+        # Compile dengan optimizer yang lebih baik dan learning rate scheduling
+        # Learning rate lebih kecil karena kita fine-tune
         model.compile(
-            optimizer=keras.optimizers.Adam(learning_rate=0.001),
+            optimizer=keras.optimizers.Adam(
+                learning_rate=0.0001,  # Lower LR untuk fine-tuning
+                beta_1=0.9,
+                beta_2=0.999,
+                epsilon=1e-07
+            ),
             loss='categorical_crossentropy',
-            metrics=['accuracy']
+            metrics=['accuracy', keras.metrics.TopKCategoricalAccuracy(k=2, name='top_2_accuracy')]
         )
         
-        logger.info("✓ MobileNetV2 model built successfully")
-        logger.info(f"  Base model: MobileNetV2 (ImageNet weights)")
+        logger.info("✓ Enhanced face recognition model built successfully")
+        logger.info(f"  Architecture: EfficientNetB3 + Deep Classification Head")
+        logger.info(f"  Input size: 300x300 (higher resolution for better accuracy)")
         logger.info(f"  Total parameters: {model.count_params():,}")
         logger.info(f"  Trainable parameters: {sum([tf.size(w).numpy() for w in model.trainable_weights]):,}")
         logger.info(f"  Non-trainable parameters: {sum([tf.size(w).numpy() for w in model.non_trainable_weights]):,}")
+        logger.info(f"  Dense layers: 512 → 256 → 128 → {num_classes}")
         
         return model
     
@@ -280,7 +317,9 @@ class TrainingService:
                 width_shift_range=0.2,
                 height_shift_range=0.2,
                 horizontal_flip=True,
-                zoom_range=0.2
+                zoom_range=0.2,
+                brightness_range=[0.8, 1.2],  # Brightness variation
+                fill_mode='nearest'
             )
             
             logger.info(f"\nTraining configuration:")
@@ -288,41 +327,61 @@ class TrainingService:
             logger.info(f"  Epochs: {epochs}")
             logger.info(f"  Batch size: {batch_size}")
             logger.info(f"  Validation split: {validation_split}")
-            logger.info(f"  Data augmentation: Enabled (training data only)")
+            logger.info(f"  Data augmentation: Enhanced (rotation, shift, flip, zoom, brightness)")
+            
+            # Enhanced callbacks untuk better training
+            callbacks_list = [
+                # Early stopping - stop jika tidak ada improvement
+                keras.callbacks.EarlyStopping(
+                    monitor='val_accuracy',
+                    mode='max',
+                    patience=15,  # Lebih sabar karena fine-tuning butuh lebih lama
+                    restore_best_weights=True,
+                    verbose=1
+                ),
+                # Learning rate reduction - kurangi LR jika stuck
+                keras.callbacks.ReduceLROnPlateau(
+                    monitor='val_loss',
+                    factor=0.5,
+                    patience=5,
+                    min_lr=1e-7,
+                    verbose=1
+                ),
+                # Model checkpoint - save best model
+                keras.callbacks.ModelCheckpoint(
+                    filepath=str(self.models_dir / 'best_model.h5'),
+                    monitor='val_accuracy',
+                    mode='max',
+                    save_best_only=True,
+                    verbose=1
+                ),
+                # Custom logger
+                TrainingLogger()
+            ]
             
             # Train model dengan callback lebih baik
-            logger.info("\nStarting training...")
+            logger.info("\nStarting training with enhanced architecture...")
+            logger.info("  Strategy: Transfer Learning + Fine-Tuning")
+            logger.info("  Expected: Higher accuracy but slower training")
+            
             self.history = self.model.fit(
                 datagen.flow(train_images, train_labels, batch_size=batch_size),
                 epochs=epochs,
                 validation_data=(val_images, val_labels),
                 verbose=1,
-                callbacks=[
-                    keras.callbacks.EarlyStopping(
-                        monitor='val_accuracy',  # Pantau akurasi validation, bukan loss
-                        mode='max',
-                        patience=10,  # Lebih lama tunggu improvement
-                        restore_best_weights=True,
-                        verbose=1
-                    ),
-                    keras.callbacks.ReduceLROnPlateau(
-                        monitor='val_loss',
-                        factor=0.5,
-                        patience=3,
-                        min_lr=1e-7,
-                        verbose=1
-                    ),
-                    TrainingLogger()
-                ]
+                callbacks=callbacks_list
             )
             
             training_time = time.time() - start_time
             
             # Evaluate model
             logger.info("\nEvaluating model...")
-            test_loss, test_accuracy = self.model.evaluate(
-                images, labels_encoded, verbose=0
-            )
+            eval_results = self.model.evaluate(images, labels_encoded, verbose=0)
+            
+            # Unpack results (support both 2 and 3+ metrics)
+            test_loss = eval_results[0]
+            test_accuracy = eval_results[1]
+            test_top_2_accuracy = eval_results[2] if len(eval_results) > 2 else 0.0
             
             # Save model
             model_path = self.models_dir / 'model.h5'
@@ -340,11 +399,16 @@ class TrainingService:
             accuracy_data = {
                 'test_loss': float(test_loss),
                 'test_accuracy': float(test_accuracy),
+                'test_top_2_accuracy': float(test_top_2_accuracy),
                 'training_accuracy': float(self.history.history['accuracy'][-1]),
                 'training_loss': float(self.history.history['loss'][-1]),
                 'validation_accuracy': float(self.history.history['val_accuracy'][-1]),
                 'validation_loss': float(self.history.history['val_loss'][-1]),
+                'top_2_accuracy': float(self.history.history.get('top_2_accuracy', [0])[-1]),
+                'val_top_2_accuracy': float(self.history.history.get('val_top_2_accuracy', [0])[-1]),
                 'epochs_trained': len(self.history.history['loss']),
+                'best_epoch': len(self.history.history['loss']) - 15,  # Estimate based on early stopping patience
+                'model_architecture': 'EfficientNetB3 + Deep Classification Head (300x300)',  
                 'timestamp': datetime.now().isoformat()
             }
             accuracy_path = self.models_dir / 'accuracy.json'

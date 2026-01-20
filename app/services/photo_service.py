@@ -9,8 +9,8 @@ from app.utils.logger import logger
 DATASET_DIR = "dataset"
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif'}
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
-RESIZE_WIDTH = 224
-RESIZE_HEIGHT = 224
+RESIZE_WIDTH = 300  # Sesuai dengan EfficientNetB3
+RESIZE_HEIGHT = 300  # Sesuai dengan EfficientNetB3
 
 class PhotoService:
 

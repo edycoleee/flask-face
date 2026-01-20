@@ -108,8 +108,8 @@ class PredictionService:
             raise ImportError("Pillow is not installed. Install with: pip install Pillow")
         
         try:
-            # Load dan resize ke 224x224
-            img = load_img(str(image_path), target_size=(224, 224))
+            # Load dan resize ke 300x300 (untuk EfficientNetB3)
+            img = load_img(str(image_path), target_size=(300, 300))
             img_array = img_to_array(img)
             
             # Normalize ke [0, 1]

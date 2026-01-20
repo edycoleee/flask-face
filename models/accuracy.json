@@ -1,10 +1,15 @@
 {
-  "test_loss": 0.8522784113883972,
-  "test_accuracy": 0.6000000238418579,
-  "training_accuracy": 0.4545454680919647,
-  "training_loss": 1.3902313709259033,
-  "validation_accuracy": 0.3636363744735718,
-  "validation_loss": 1.3811248540878296,
-  "epochs_trained": 18,
-  "timestamp": "2026-01-20T09:34:03.173814"
+  "test_loss": 13.898056030273438,
+  "test_accuracy": 0.3333333432674408,
+  "test_top_2_accuracy": 0.6666666865348816,
+  "training_accuracy": 0.3461538553237915,
+  "training_loss": 13.768824577331543,
+  "validation_accuracy": 0.0,
+  "validation_loss": 13.85003662109375,
+  "top_2_accuracy": 0.7307692170143127,
+  "val_top_2_accuracy": 0.0,
+  "epochs_trained": 16,
+  "best_epoch": 1,
+  "model_architecture": "EfficientNetB3 + Deep Classification Head (300x300)",
+  "timestamp": "2026-01-20T11:41:32.877876"
 }
