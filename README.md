@@ -416,44 +416,243 @@ Berikut adalah **tabel lengkap semua API endpoints** dengan method, request, dan
 
 ## 📝 Common Request/Response Examples
 
-### Create User with Password
+### 1️⃣ Create User (First Step)
 ```bash
 curl -X POST http://localhost:5000/api/users \
   -H "Content-Type: application/json" \
   -d '{"name": "John Doe", "email": "john@email.com", "password": "secure123"}'
 ```
+**Response:**
+```json
+{
+  "id": 1,
+  "name": "John Doe",
+  "email": "john@email.com",
+  "password": "secure123"
+}
+```
+**Note**: Folder `dataset/1/` otomatis dibuat saat user baru berhasil dibuat.
 
-### Upload Photo
+---
+
+### 2️⃣ Upload Photos (Second Step)
+Upload minimal 5-10 foto wajah untuk user tersebut:
+
+**Single Photo:**
 ```bash
 curl -X POST http://localhost:5000/api/photos/1/upload \
-  -F "file=@photo.jpg"
+  -F "file=@photo1.jpg"
 ```
 
-### Train Model
+**Multiple Photos (Recommended):**
+```bash
+curl -X POST http://localhost:5000/api/photos/1/upload/multiple \
+  -F "files=@photo1.jpg" \
+  -F "files=@photo2.jpg" \
+  -F "files=@photo3.jpg" \
+  -F "files=@photo4.jpg" \
+  -F "files=@photo5.jpg"
+```
+**Response:**
+```json
+{
+  "uploaded": 5,
+  "files": [
+    {
+      "id": 1,
+      "user_id": 1,
+      "filename": "photo1.jpg",
+      "filepath": "dataset/1/photo1.jpg",
+      "width": 224,
+      "height": 224
+    }
+  ]
+}
+```
+
+---
+
+### 3️⃣ Build Face Database (Third Step)
+Setelah semua user punya foto, rebuild database embedding:
+
 ```bash
 curl -X POST http://localhost:5000/api/training/start \
   -H "Content-Type: application/json" \
-  -d '{"epochs": 50, "batch_size": 16}'
+  -d '{}'
+```
+**Note**: Tidak perlu parameter epochs/batch_size lagi (sistem embedding tidak ada training).
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Face database built successfully",
+  "data": {
+    "num_data": 25,
+    "num_classes": 3,
+    "total_faces": 25,
+    "training_time_minutes": 0.5,
+    "model_path": "models/face_db.npy"
+  }
+}
 ```
 
-### Face Prediction
+---
+
+### 4️⃣ Face Prediction
+Test apakah wajah bisa dikenali:
+
 ```bash
 curl -X POST http://localhost:5000/api/face/predict \
   -F "file=@test_face.jpg"
 ```
+**Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "user_id": 1,
+    "name": "John Doe",
+    "email": "john@email.com",
+    "confidence": 98.5,
+    "all_predictions": [
+      {"user_id": 1, "name": "John Doe", "confidence": 98.5},
+      {"user_id": 2, "name": "Jane Smith", "confidence": 1.2}
+    ]
+  }
+}
+```
 
-### Password Login
+---
+
+### 5️⃣ Password Login
 ```bash
 curl -X POST http://localhost:5000/api/auth/login-pass-verify \
   -H "Content-Type: application/json" \
   -d '{"email": "john@email.com", "password": "secure123"}'
 ```
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Login successful",
+  "data": {
+    "user_id": 1,
+    "name": "John Doe",
+    "email": "john@email.com",
+    "token": "550e8400-e29b-41d4-a716-446655440000",
+    "expires_at": "2026-01-22T10:00:00"
+  }
+}
+```
 
-### Face Verification Login (Recommended)
+---
+
+### 6️⃣ Face Verification Login (Recommended ⚡)
 ```bash
 curl -X POST http://localhost:5000/api/auth/login-face-verify \
-  -F "user_id=2" \
+  -F "user_id=1" \
   -F "file=@face.jpg"
+```
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Face verification successful",
+  "data": {
+    "match": true,
+    "user_id": 1,
+    "name": "John Doe",
+    "token": "550e8400-e29b-41d4-a716-446655440000",
+    "confidence": 98.5,
+    "expires_at": "2026-01-22T10:00:00"
+  }
+}
+```
+
+---
+
+## 🚀 Quick Start: Menambah User Baru
+
+Berikut langkah lengkap untuk menambah user baru dari awal:
+
+### **Opsi A: Via API (Command Line)**
+
+```bash
+# Step 1: Buat user baru
+curl -X POST http://localhost:5000/api/users \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Alice", "email": "alice@email.com", "password": "pass123"}'
+
+# Response akan berisi ID user (misalnya: {"id": 3, ...})
+
+# Step 2: Upload foto-foto wajah (minimal 5-10 foto)
+curl -X POST http://localhost:5000/api/photos/3/upload/multiple \
+  -F "files=@alice1.jpg" \
+  -F "files=@alice2.jpg" \
+  -F "files=@alice3.jpg" \
+  -F "files=@alice4.jpg" \
+  -F "files=@alice5.jpg"
+
+# Step 3: Rebuild face database
+curl -X POST http://localhost:5000/api/training/start \
+  -H "Content-Type: application/json" \
+  -d '{}'
+
+# Step 4: Test prediction
+curl -X POST http://localhost:5000/api/face/predict \
+  -F "file=@alice_test.jpg"
+```
+
+### **Opsi B: Via Web Interface (Lebih Mudah)**
+
+1. **Buka browser**: `http://localhost:5000`
+2. **Tab "Users"**: 
+   - Klik "Create User"
+   - Isi: Name, Email, Password
+   - Klik "Submit"
+3. **Tab "Photos"**:
+   - Pilih user yang baru dibuat
+   - Klik "Choose Files" atau "Open Camera"
+   - Upload minimal 5-10 foto berbeda (berbagai sudut, ekspresi)
+4. **Tab "Database Build"**:
+   - Klik "Build Database Now"
+   - Tunggu proses selesai (~10-30 detik)
+5. **Tab "Prediction"**:
+   - Upload foto test
+   - Sistem akan mengenali wajah Alice
+
+### **📋 Checklist Menambah User Baru**
+
+- ✅ Buat user baru dengan name, email, password
+- ✅ Folder `dataset/<user_id>/` otomatis dibuat
+- ✅ Upload minimal **5-10 foto** wajah yang jelas
+- ✅ Foto dari **berbagai sudut** (depan, samping, berbagai ekspresi)
+- ✅ Kualitas foto baik (pencahayaan cukup, fokus jelas)
+- ✅ Rebuild database setelah upload foto
+- ✅ Test prediction untuk verifikasi
+
+### **⚠️ Tips Penting**
+
+- **Minimal 5 foto** per user untuk akurasi baik
+- **Lebih banyak foto = lebih akurat** (10-20 foto ideal)
+- **Variasi penting**: foto dengan kacamata/tanpa, tersenyum/serius, sudut berbeda
+- **Pencahayaan**: Hindari foto terlalu gelap atau overexposed
+- **Rebuild wajib**: Setiap kali ada perubahan foto, rebuild database
+- **Format**: JPG atau PNG, sistem auto-resize ke 224×224
+
+---
+
+### **🔄 Workflow Lengkap**
+
+```
+1. CREATE USER
+   ↓
+2. UPLOAD PHOTOS (5-10 foto minimum)
+   ↓
+3. BUILD DATABASE (10-30 detik)
+   ↓
+4. READY FOR PREDICTION/LOGIN
 ```
 
 ---

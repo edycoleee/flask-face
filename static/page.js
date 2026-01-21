@@ -105,7 +105,7 @@ function setupForms() {
         uploadCameraForm.addEventListener('submit', handleUploadCameraPhoto);
     }
     
-    // Training Form
+    // Database Build Form
     const trainingForm = document.getElementById('trainingForm');
     if (trainingForm) {
         trainingForm.addEventListener('submit', startTraining);
@@ -959,21 +959,11 @@ function hideCameraError() {
 }
 
 
-// ==================== TRAINING SECTION ====================
+// ==================== DATABASE BUILD SECTION ====================
 
-// Start training
+// Build face database
 async function startTraining(e) {
     e.preventDefault();
-    
-    const form = e.target;
-    const formData = new FormData(form);
-    
-    const trainingData = {
-        epochs: parseInt(formData.get('epochs')),
-        batch_size: parseInt(formData.get('batch_size')),
-        validation_split: parseFloat(formData.get('validation_split')),
-        continue_training: formData.get('continue_training') === 'true'
-    };
     
     const messageEl = document.getElementById('trainingMessage');
     const startBtn = document.getElementById('startTrainingBtn');
@@ -986,27 +976,28 @@ async function startTraining(e) {
     
     // Disable button
     startBtn.disabled = true;
-    startBtn.innerHTML = '⏳ Training...';
+    startBtn.innerHTML = '⏳ Building...';
     
     // Update progress
-    updateProgress(0, 'Initializing training...');
+    updateProgress(0, 'Initializing database build...');
     
     try {
-        showMessage(messageEl, '🚀 Training started...', 'info');
-        updateProgress(10, 'Loading dataset...');
+        showMessage(messageEl, '🔄 Building face database...', 'info');
+        updateProgress(20, 'Scanning dataset folder...');
         
+        // No parameters needed - always full rebuild
         const response = await fetch(`${API_BASE}/training/start`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(trainingData)
+            body: JSON.stringify({})  // Empty body - no params needed
         });
         
         const data = await response.json();
         
         if (response.ok) {
-            updateProgress(100, 'Training completed!');
+            updateProgress(100, 'Database built successfully!');
             showMessage(messageEl, '✅ ' + data.message, 'success');
             displayTrainingResults(data.data);
             resultsCard.style.display = 'block';
@@ -1016,17 +1007,17 @@ async function startTraining(e) {
                 checkModelStatus();
             }, 1000);
         } else {
-            updateProgress(0, 'Training failed');
-            showMessage(messageEl, '❌ Error: ' + (data.message || 'Training failed'), 'error');
+            updateProgress(0, 'Build failed');
+            showMessage(messageEl, '❌ Error: ' + (data.message || 'Database build failed'), 'error');
             progressCard.style.display = 'none';
         }
     } catch (error) {
-        updateProgress(0, 'Training failed');
+        updateProgress(0, 'Build failed');
         showMessage(messageEl, '❌ Error: ' + error.message, 'error');
         progressCard.style.display = 'none';
     } finally {
         startBtn.disabled = false;
-        startBtn.innerHTML = '🚀 Start Training';
+        startBtn.innerHTML = '🔄 Build Database Now';
     }
 }
 
@@ -1045,7 +1036,7 @@ function updateProgress(percent, text) {
     }
 }
 
-// Display training results
+// Display database build results
 function displayTrainingResults(stats) {
     const resultsContainer = document.getElementById('trainingResults');
     
@@ -1054,33 +1045,30 @@ function displayTrainingResults(stats) {
         return;
     }
     
-    const accuracyClass = stats.test_accuracy >= 0.9 ? 'success' : 
-                         stats.test_accuracy >= 0.7 ? 'warning' : 'danger';
-    
     resultsContainer.innerHTML = `
         <div class="result-item">
-            <div class="label">Test Accuracy</div>
-            <div class="value ${accuracyClass}">${(stats.test_accuracy * 100).toFixed(2)}%</div>
+            <div class="label">Build Time</div>
+            <div class="value success">${stats.training_time_minutes} min</div>
         </div>
         <div class="result-item">
-            <div class="label">Test Loss</div>
-            <div class="value">${stats.test_loss.toFixed(4)}</div>
-        </div>
-        <div class="result-item">
-            <div class="label">Training Time</div>
-            <div class="value">${stats.training_time_minutes} min</div>
-        </div>
-        <div class="result-item">
-            <div class="label">Epochs Trained</div>
-            <div class="value">${stats.epochs_trained}</div>
-        </div>
-        <div class="result-item">
-            <div class="label">Total Images</div>
+            <div class="label">Total Images Processed</div>
             <div class="value">${stats.num_data}</div>
+        </div>
+        <div class="result-item">
+            <div class="label">Total Faces Detected</div>
+            <div class="value">${stats.num_classes || stats.class_labels?.length || 0}</div>
         </div>
         <div class="result-item">
             <div class="label">Number of Users</div>
             <div class="value">${stats.num_classes}</div>
+        </div>
+        <div class="result-item">
+            <div class="label">Database Path</div>
+            <div class="value" style="font-size: 0.85em;">${stats.model_path}</div>
+        </div>
+        <div class="result-item">
+            <div class="label">Status</div>
+            <div class="value success">✅ Ready for Prediction</div>
         </div>
     `;
     
@@ -1089,9 +1077,9 @@ function displayTrainingResults(stats) {
     if (classLabels && classLabels.length > 0) {
         resultsContainer.innerHTML += `
             <div style="grid-column: 1 / -1;">
-                <h3 style="margin: 20px 0 10px 0;">📊 Recognized Users</h3>
+                <h3 style="margin: 20px 0 10px 0;">📊 Registered Users</h3>
                 <p style="color: #6b7280; margin-bottom: 15px;">
-                    Model trained to recognize: ${classLabels.join(', ')}
+                    Database contains embeddings for: ${classLabels.join(', ')}
                 </p>
             </div>
         `;
@@ -1118,85 +1106,69 @@ async function checkModelStatus() {
     }
 }
 
-// Display model status
+// Display model status (database status)
 function displayModelStatus(status) {
     const statusContainer = document.getElementById('modelStatus');
     
     const statusBadge = status.model_available 
-        ? '<span class="status-badge available">✅ Model Available</span>'
-        : '<span class="status-badge unavailable">❌ No Model</span>';
+        ? '<span class="status-badge available">✅ Database Available</span>'
+        : '<span class="status-badge unavailable">❌ No Database</span>';
     
     let statusHTML = `
         <div class="status-grid">
             <div class="status-item">
-                <div class="label">Model Status</div>
+                <div class="label">Database Status</div>
                 <div class="value">${statusBadge}</div>
             </div>
     `;
     
-    if (status.model_available && status.accuracy_metrics) {
-        const metrics = status.accuracy_metrics;
-        const accuracyClass = metrics.test_accuracy >= 0.9 ? 'success' : 
-                             metrics.test_accuracy >= 0.7 ? 'warning' : 'danger';
+    if (status.model_available) {
+        const users = status.users || status.class_labels || [];
+        const numUsers = status.num_classes || users.length || 0;
+        const numData = status.num_data || 0;
         
         statusHTML += `
             <div class="status-item">
-                <div class="label">Test Accuracy</div>
-                <div class="value ${accuracyClass}">${(metrics.test_accuracy * 100).toFixed(2)}%</div>
+                <div class="label">Total Faces</div>
+                <div class="value success">${numData}</div>
             </div>
             <div class="status-item">
-                <div class="label">Epochs Trained</div>
-                <div class="value">${metrics.epochs_trained}</div>
+                <div class="label">Registered Users</div>
+                <div class="value">${numUsers}</div>
             </div>
             <div class="status-item">
-                <div class="label">Last Updated</div>
-                <div class="value">${new Date(metrics.timestamp).toLocaleString()}</div>
+                <div class="label">Database Path</div>
+                <div class="value" style="font-size: 0.85em;">${status.model_path || 'face_db.npy'}</div>
             </div>
         `;
         
         statusHTML += `</div>`;
         
-        // Add detailed metrics table
-        statusHTML += `
-            <table class="metric-table">
-                <thead>
-                    <tr>
-                        <th>Metric</th>
-                        <th>Value</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Training Accuracy</td>
-                        <td class="metric-value">${(metrics.training_accuracy * 100).toFixed(2)}%</td>
-                    </tr>
-                    <tr>
-                        <td>Training Loss</td>
-                        <td class="metric-value">${metrics.training_loss.toFixed(4)}</td>
-                    </tr>
-                    <tr>
-                        <td>Validation Accuracy</td>
-                        <td class="metric-value">${(metrics.validation_accuracy * 100).toFixed(2)}%</td>
-                    </tr>
-                    <tr>
-                        <td>Validation Loss</td>
-                        <td class="metric-value">${metrics.validation_loss.toFixed(4)}</td>
-                    </tr>
-                    <tr>
-                        <td>Test Accuracy</td>
-                        <td class="metric-value">${(metrics.test_accuracy * 100).toFixed(2)}%</td>
-                    </tr>
-                    <tr>
-                        <td>Test Loss</td>
-                        <td class="metric-value">${metrics.test_loss.toFixed(4)}</td>
-                    </tr>
-                </tbody>
-            </table>
-        `;
+        // Add registered users list
+        if (users && users.length > 0) {
+            statusHTML += `
+                <div style="margin-top: 20px;">
+                    <h3 style="margin-bottom: 10px; color: #374151;">👥 Registered Users</h3>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            `;
+            
+            users.forEach(user => {
+                statusHTML += `
+                    <span style="background: #e0e7ff; color: #4f46e5; padding: 6px 12px; border-radius: 6px; font-size: 0.9em;">
+                        ${user}
+                    </span>
+                `;
+            });
+            
+            statusHTML += `
+                    </div>
+                </div>
+            `;
+        }
     } else {
         statusHTML += `</div>
             <p style="margin-top: 20px; color: #6b7280;">
-                No trained model available. Start training to create a new model.
+                No database available. Click "Build Database Now" to create embeddings from your dataset.
             </p>
         `;
     }

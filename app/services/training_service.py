@@ -110,16 +110,24 @@ class TrainingService:
     # ============================================================
     # TRAIN (Alias for build_face_database untuk backward compatibility)
     # ============================================================
-    def train(self, epochs=None, batch_size=None, validation_split=None, continue_training=False):
+    def train(self, epochs=None, batch_size=None, validation_split=None, continue_training=None):
         """
-        Build face embedding database
-        Ini bukan training neural network, tapi membuat database embeddings
+        Build face embedding database (Full Rebuild)
         
-        Args yang diabaikan (untuk backward compatibility):
-            epochs, batch_size, validation_split - tidak digunakan
+        NOTE: Ini BUKAN training neural network!
+        - Model InsightFace sudah pre-trained
+        - Kita hanya ekstrak embeddings dari foto
+        - Selalu rebuild SEMUA (10-30 detik)
+        - Tidak ada "continue" training (not applicable)
         
-        Args:
-            continue_training: Jika True, akan menambahkan ke database yang sudah ada
+        Args (diabaikan untuk backward compatibility):
+            epochs: Tidak digunakan (no training epochs)
+            batch_size: Tidak digunakan (no batching)
+            validation_split: Tidak digunakan (no validation)
+            continue_training: Tidak digunakan (always full rebuild)
+        
+        Returns:
+            dict: Statistics (num_data, num_classes, etc.)
         """
         import time
         start_time = time.time()
@@ -128,6 +136,7 @@ class TrainingService:
         logger.info("BUILDING FACE EMBEDDING DATABASE")
         logger.info("=" * 50)
         logger.info("Method: InsightFace (Pre-trained MobileFaceNet)")
+        logger.info("Mode: FULL REBUILD (always fresh)")
         logger.info("No training needed - extracting embeddings only")
         logger.info("=" * 50)
         

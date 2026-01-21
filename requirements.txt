@@ -1,16 +1,43 @@
-flask
-flask-restx
-requests
-werkzeug
-gunicorn
-pytest
-Flask-SQLAlchemy
-Pillow
-tensorflow
-keras
-numpy
-scikit-learn
-matplotlib
-insightface
-onnxruntime
-scikit-learn
+# Core Flask Framework
+flask>=3.0.0
+flask-restx>=1.3.0
+flask-sqlalchemy>=3.1.0
+werkzeug>=3.0.0
+
+# Web Server (Production)
+gunicorn>=23.0.0
+
+# HTTP Requests
+requests>=2.32.0
+
+# Database
+# SQLAlchemy is included via flask-sqlalchemy
+
+# Face Recognition (InsightFace - Primary)
+insightface>=0.7.3
+onnxruntime>=1.23.0
+
+# Image Processing
+Pillow>=10.0.0
+opencv-python-headless>=4.9.0
+
+# Machine Learning & Math
+numpy>=1.24.0,<2.0.0
+scikit-learn>=1.3.0
+
+# Deep Learning (Optional - for backward compatibility)
+# tensorflow>=2.15.0
+# keras>=3.0.0
+
+# Data Visualization (Optional)
+# matplotlib>=3.8.0
+
+# Testing
+pytest>=8.0.0
+
+# Additional Dependencies (auto-installed by insightface)
+# - albumentations
+# - scikit-image
+# - tqdm
+# - easydict
+# - prettytable

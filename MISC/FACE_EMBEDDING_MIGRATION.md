@@ -24,14 +24,30 @@ pip install insightface onnxruntime scikit-learn Pillow numpy
 
 **Endpoint:** `POST /api/training/start`
 
+**PENTING:** Ini BUKAN training! Hanya ekstrak embeddings.
+
 **Request:**
 ```json
 {
-  "epochs": 50,           // DIABAIKAN (backward compatibility)
-  "batch_size": 16,       // DIABAIKAN
-  "validation_split": 0.2 // DIABAIKAN
+  // Semua parameter DIABAIKAN (backward compatibility)
+  "epochs": 50,           // ❌ DIABAIKAN
+  "batch_size": 16,       // ❌ DIABAIKAN  
+  "validation_split": 0.2,// ❌ DIABAIKAN
+  "continue_training": false // ❌ DIABAIKAN (always full rebuild)
 }
 ```
+
+**Atau kirim kosong (recommended):**
+```json
+{}
+```
+
+**Behavior:**
+- ✅ **Selalu FULL REBUILD** (10-30 detik)
+- ✅ Scan semua foto di `dataset/`
+- ✅ Extract embeddings untuk semua users
+- ✅ Auto-cleanup orphaned data
+- ✅ Fresh database setiap kali
 
 **Response:**
 ```json

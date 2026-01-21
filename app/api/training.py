@@ -10,10 +10,10 @@ training_ns = Namespace('training', description='Training CNN Model Operations')
 
 # Request models
 training_request_model = training_ns.model('TrainingRequest', {
-    'epochs': fields.Integer(description='Number of epochs (default: 50)', required=False),
-    'batch_size': fields.Integer(description='Batch size (default: 16)', required=False),
-    'validation_split': fields.Float(description='Validation split ratio (default: 0.2)', required=False),
-    'continue_training': fields.Boolean(description='Continue training from existing model (default: False)', required=False),
+    'epochs': fields.Integer(description='[IGNORED] Number of epochs (for backward compatibility)', required=False),
+    'batch_size': fields.Integer(description='[IGNORED] Batch size (for backward compatibility)', required=False),
+    'validation_split': fields.Float(description='[IGNORED] Validation split (for backward compatibility)', required=False),
+    'continue_training': fields.Boolean(description='[IGNORED] Always full rebuild (for backward compatibility)', required=False),
 })
 
 # Response models
@@ -41,50 +41,60 @@ class TrainingStart(Resource):
     @training_ns.response(500, 'Server error', error_response_model)
     def post(self):
         """
-        Start CNN model training
+        Build Face Embedding Database (FULL REBUILD)
         
-        **Parameters:**
-        - `epochs`: Number of epochs (default: 50)
-        - `batch_size`: Batch size per iteration (default: 16)
-        - `validation_split`: Validation data ratio (default: 0.2)
-        - `continue_training`: True = lanjut training model existing, False = training baru (default: False)
+        **IMPORTANT:** This is NOT neural network training!
+        - Uses pre-trained InsightFace model
+        - Extracts embeddings from all photos in dataset/
+        - Always rebuilds entire database (10-30 seconds)
+        - No "continue" mode (not applicable for embeddings)
         
-        **Returns training statistics:**
-        - num_data: Total number of training images
+        **Parameters (IGNORED - for backward compatibility only):**
+        - `epochs`: Not used (no training)
+        - `batch_size`: Not used (no batching)
+        - `validation_split`: Not used (no validation)
+        - `continue_training`: Not used (always full rebuild)
+        
+        **How it works:**
+        1. Scan all folders in `dataset/`
+        2. Detect faces in each photo
+        3. Extract 512-D embeddings using InsightFace
+        4. Save to `models/face_db.npy`
+        
+        **When to rebuild:**
+        - ✅ After adding new users
+        - ✅ After uploading new photos
+        - ✅ After deleting users (cleanup orphaned data)
+        - ✅ Anytime (very fast: 10-30 seconds)
+        
+        **Returns statistics:**
+        - num_data: Total number of images processed
         - num_classes: Number of unique users
-        - test_accuracy: Model accuracy on test set
-        - test_loss: Model loss on test set
-        - training_time_seconds: Total training time in seconds
-        - epochs_trained: Number of epochs trained
-        - model_path: Path to saved model
+        - total_faces: Number of faces detected
+        - training_time_seconds: Time taken to build database
+        - model_path: Path to saved database
         """
         try:
-            logger.info("Training request received")
+            logger.info("Face database rebuild request received")
             
-            # Get parameters from request body
+            # Get parameters from request (all ignored, for backward compatibility)
             data = request.get_json() or {}
-            epochs = data.get('epochs', 50)
-            batch_size = data.get('batch_size', 16)
-            validation_split = data.get('validation_split', 0.2)
-            continue_training = data.get('continue_training', False)
             
-            logger.info(f"Training params: epochs={epochs}, batch_size={batch_size}, "
-                       f"validation_split={validation_split}, continue_training={continue_training}")
+            # Log parameters (even though ignored)
+            if data:
+                logger.info(f"Parameters received (will be ignored): {data}")
+            
+            logger.info("Building face embedding database (full rebuild)...")
             
             # Initialize service
             service = TrainingService()
             
-            # Run training
-            stats = service.train(
-                epochs=epochs,
-                batch_size=batch_size,
-                validation_split=validation_split,
-                continue_training=continue_training
-            )
+            # Build database (always full rebuild)
+            stats = service.train()
             
             return {
                 'success': True,
-                'message': 'Training completed successfully',
+                'message': 'Face database built successfully',
                 'data': stats
             }, 200
             
@@ -142,7 +152,9 @@ class TrainingStatus(Resource):
                 return {
                     'success': False,
                     'message': 'No trained model found',
-                    'model_available': False
+                    'data': {
+                        'model_available': False
+                    }
                 }, 200
             
             # Check for embedding database files (NEW system)
@@ -153,7 +165,9 @@ class TrainingStatus(Resource):
                 return {
                     'success': False,
                     'message': 'Face database not found. Please build database first.',
-                    'model_available': False
+                    'data': {
+                        'model_available': False
+                    }
                 }, 200
             
             # Load metadata
@@ -163,17 +177,18 @@ class TrainingStatus(Resource):
             return {
                 'success': True,
                 'message': 'Face database information retrieved',
-                'model_available': True,
-                'accuracy_metrics': {
-                    'model': meta_data.get('model', 'InsightFace'),
+                'data': {
+                    'model_available': True,
+                    'model_path': str(db_file),
+                    'num_classes': len(meta_data.get('users', [])),
+                    'num_data': meta_data.get('total_images', 0),
+                    'class_labels': meta_data.get('users', []),
+                    'users': meta_data.get('users', []),
+                    'total_faces': meta_data.get('total_faces', 0),
                     'embedding_dim': meta_data.get('embedding_dim', 512),
+                    'samples_per_user': meta_data.get('samples_per_user', {}),
                     'timestamp': meta_data.get('timestamp', 'N/A')
-                },
-                'num_classes': len(meta_data.get('users', [])),
-                'class_labels': meta_data.get('users', []),
-                'total_faces': meta_data.get('total_faces', 0),
-                'total_images': meta_data.get('total_images', 0),
-                'samples_per_user': meta_data.get('samples_per_user', {})
+                }
             }, 200
             
         except Exception as e:
