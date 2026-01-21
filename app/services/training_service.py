@@ -383,10 +383,21 @@ class TrainingService:
             test_accuracy = eval_results[1]
             test_top_2_accuracy = eval_results[2] if len(eval_results) > 2 else 0.0
             
-            # Save model
+            # Use best model (from ModelCheckpoint) as final model
+            best_model_path = self.models_dir / 'best_model.h5'
             model_path = self.models_dir / 'model.h5'
-            self.model.save(str(model_path))
-            logger.info(f"Model saved: {model_path}")
+            
+            if best_model_path.exists():
+                # Copy best_model.h5 to model.h5 untuk konsistensi
+                import shutil
+                shutil.copy2(str(best_model_path), str(model_path))
+                logger.info(f"✓ Using best model (val_accuracy tertinggi)")
+                logger.info(f"  Best model: {best_model_path}")
+                logger.info(f"  Copied to: {model_path}")
+            else:
+                # Fallback: save current model
+                self.model.save(str(model_path))
+                logger.info(f"Model saved: {model_path}")
             
             # Save label mapping
             label_map = {idx: label for idx, label in enumerate(self.label_encoder.classes_)}

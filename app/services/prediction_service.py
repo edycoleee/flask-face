@@ -31,7 +31,10 @@ class PredictionService:
     
     def __init__(self):
         self.models_dir = Path('models')
-        self.model_path = self.models_dir / 'model.h5'
+        # Prefer best_model.h5 (dari ModelCheckpoint), fallback ke model.h5
+        best_model = self.models_dir / 'best_model.h5'
+        regular_model = self.models_dir / 'model.h5'
+        self.model_path = best_model if best_model.exists() else regular_model
         self.label_map_path = self.models_dir / 'label_map.json'
         
         self.model = None
