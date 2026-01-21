@@ -1,0 +1,17 @@
+{
+  "users": [
+    "1",
+    "2",
+    "3"
+  ],
+  "samples_per_user": {
+    "1": 11,
+    "2": 11,
+    "3": 11
+  },
+  "total_images": 33,
+  "total_faces": 33,
+  "embedding_dim": 512,
+  "model": "InsightFace MobileFaceNet (buffalo_l)",
+  "timestamp": "2026-01-21T20:18:12.118687"
+}

@@ -1,0 +1,462 @@
+2026-01-14 16:49:18,803 - INFO - POST /halo payload: {'nama': 'string', 'message': 'string'}
+2026-01-14 16:49:36,377 - INFO - GET /halo dipanggil
+2026-01-14 16:51:44,244 - INFO - POST /halo payload: {'nama': 'string'}
+2026-01-14 17:08:25,404 - INFO - POST /halo payload: {'nama': 'aaaa', 'handphone': '22222'}
+2026-01-14 17:09:43,357 - INFO - POST /halo payload: {'nama': 'asas', 'handphone': '2222'}
+2026-01-14 17:23:00,820 - INFO - GET /halo dipanggil
+2026-01-14 17:23:50,365 - INFO - GET /halo dipanggil
+2026-01-14 17:24:12,160 - INFO - GET /halo dipanggil
+2026-01-14 17:24:15,538 - INFO - GET /halo dipanggil
+2026-01-14 17:25:46,404 - INFO - POST /halo payload: {'nama': 'aaaa', 'handphone': '1111'}
+2026-01-14 17:26:58,801 - INFO - POST /halo payload: {'nama': 'Edy', 'handphone': '08111111'}
+2026-01-14 17:27:13,196 - INFO - GET /halo dipanggil
+2026-01-14 17:27:13,205 - INFO - POST /halo payload: {'handphone': '081111', 'nama': 'edy'}
+2026-01-14 17:30:23,919 - INFO - GET /halo dipanggil
+2026-01-14 17:30:23,926 - INFO - POST /halo payload: {'nama': 'edy', 'handphone': '081111'}
+2026-01-16 08:39:03,129 - INFO - GET /halo dipanggil
+2026-01-16 08:43:50,689 - INFO - User created: 1 - folder created at dataset/1
+2026-01-16 09:01:29,483 - INFO - User created: 2 - folder created at dataset/2
+2026-01-16 09:01:29,564 - INFO - User created: 1 - folder created at dataset/1
+2026-01-16 09:01:29,577 - INFO - User created: 2 - folder created at dataset/2
+2026-01-16 09:01:29,621 - INFO - User created: 1 - folder created at dataset/1
+2026-01-16 09:01:29,671 - INFO - User created: 1 - folder created at dataset/1
+2026-01-16 09:01:29,688 - INFO - User updated: 1
+2026-01-16 09:01:29,730 - INFO - User created: 1 - folder created at dataset/1
+2026-01-16 09:04:37,461 - INFO - User created: 1 - folder created at dataset/1
+2026-01-16 09:04:37,537 - INFO - User created: 1 - folder created at dataset/1
+2026-01-16 09:04:37,547 - INFO - User created: 2 - folder created at dataset/2
+2026-01-16 09:04:37,602 - INFO - User created: 1 - folder created at dataset/1
+2026-01-16 09:04:37,672 - INFO - User created: 1 - folder created at dataset/1
+2026-01-16 09:04:37,688 - INFO - User updated: 1
+2026-01-16 09:04:37,751 - INFO - User created: 1 - folder created at dataset/1
+2026-01-16 09:06:20,062 - INFO - User created: 1 - folder created at dataset/1
+2026-01-16 09:06:20,151 - INFO - User created: 1 - folder created at dataset/1
+2026-01-16 09:06:20,162 - INFO - User created: 2 - folder created at dataset/2
+2026-01-16 09:06:20,206 - INFO - User created: 1 - folder created at dataset/1
+2026-01-16 09:06:20,256 - INFO - User created: 1 - folder created at dataset/1
+2026-01-16 09:06:20,273 - INFO - User updated: 1
+2026-01-16 09:06:20,312 - INFO - User created: 1 - folder created at dataset/1
+2026-01-16 09:50:38,641 - INFO - GET /halo dipanggil
+2026-01-16 09:50:38,656 - INFO - POST /halo payload: {'handphone': '081111', 'nama': 'edy'}
+2026-01-16 09:50:38,706 - INFO - User created: 1 - folder created at dataset/1
+2026-01-16 09:50:38,779 - INFO - User created: 1 - folder created at dataset/1
+2026-01-16 09:50:38,790 - INFO - User created: 2 - folder created at dataset/2
+2026-01-16 09:50:38,838 - INFO - User created: 1 - folder created at dataset/1
+2026-01-16 09:50:38,882 - INFO - User created: 1 - folder created at dataset/1
+2026-01-16 09:50:38,902 - INFO - User updated: 1
+2026-01-16 09:50:38,953 - INFO - User created: 1 - folder created at dataset/1
+2026-01-16 09:56:48,452 - INFO - User created: 1 - folder created at dataset/1
+2026-01-16 09:58:35,078 - INFO - User created: 2 - folder created at dataset/2
+2026-01-16 09:59:08,979 - INFO - User created: 3 - folder created at dataset/3
+2026-01-16 09:59:50,316 - INFO - User created: 4 - folder created at dataset/4
+2026-01-16 10:23:52,738 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-16 10:26:48,927 - INFO - User created: 5 - folder created at dataset/5
+2026-01-16 10:26:48,959 - INFO - User created: 6 - folder created at dataset/6
+2026-01-16 10:26:48,963 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-16 10:26:48,990 - INFO - User created: 7 - folder created at dataset/7
+2026-01-16 10:26:49,001 - INFO - User created: 8 - folder created at dataset/8
+2026-01-16 10:26:49,030 - INFO - User created: 9 - folder created at dataset/9
+2026-01-16 10:26:49,058 - INFO - User created: 10 - folder created at dataset/10
+2026-01-16 10:26:49,070 - INFO - User updated: 10
+2026-01-16 10:26:49,094 - INFO - User created: 11 - folder created at dataset/11
+2026-01-16 10:26:49,108 - INFO - User deleted: 11 - folder removed dataset/11
+2026-01-16 10:27:35,461 - INFO - User deleted: 1 - folder removed dataset/1
+2026-01-18 11:07:09,058 - INFO - User created: 11 - folder created at dataset/11
+2026-01-18 11:07:09,166 - INFO - Photo uploaded: ID=1, User=11, File=20260118_110709_test_photo.jpg
+2026-01-18 11:07:09,200 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-18 11:07:09,281 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-18 11:07:09,315 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-18 11:07:09,388 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-18 11:07:09,418 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-18 11:07:09,463 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-18 11:07:09,483 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-18 11:07:09,540 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-18 11:07:09,576 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-18 11:07:09,637 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-18 11:07:09,672 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-18 11:07:09,709 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-18 11:07:09,795 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-18 11:07:09,866 - INFO - User created: 12 - folder created at dataset/12
+2026-01-18 11:07:09,886 - INFO - User created: 13 - folder created at dataset/13
+2026-01-18 11:07:09,936 - INFO - Photo uploaded: ID=2, User=12, File=20260118_110709_user1_photo.jpg
+2026-01-18 11:07:09,969 - INFO - Photo uploaded: ID=3, User=13, File=20260118_110709_user2_photo.png
+2026-01-18 11:08:19,141 - INFO - User created: 14 - folder created at dataset/14
+2026-01-18 11:08:19,173 - INFO - Photo uploaded: ID=4, User=14, File=20260118_110819_test_photo.jpg
+2026-01-18 11:08:19,208 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-18 11:08:19,262 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-18 11:08:19,285 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-18 11:08:19,343 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-18 11:08:19,395 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-18 11:08:19,422 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-18 11:08:19,468 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-18 11:08:19,512 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-18 11:08:19,545 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-18 11:08:19,581 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-18 11:08:19,607 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-18 11:08:19,629 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-18 11:08:19,666 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-18 11:08:19,785 - INFO - User created: 15 - folder created at dataset/15
+2026-01-18 11:08:19,798 - INFO - User created: 16 - folder created at dataset/16
+2026-01-18 11:08:19,819 - INFO - Photo uploaded: ID=5, User=15, File=20260118_110819_user1_photo.jpg
+2026-01-18 11:08:19,842 - INFO - Photo uploaded: ID=6, User=16, File=20260118_110819_user2_photo.png
+2026-01-18 11:08:33,183 - INFO - User created: 17 - folder created at dataset/17
+2026-01-18 11:08:33,217 - INFO - Photo uploaded: ID=7, User=17, File=20260118_110833_test_photo.jpg
+2026-01-18 11:08:33,254 - INFO - User created: 18 - folder created at dataset/18
+2026-01-18 11:08:33,281 - INFO - Photo uploaded: ID=8, User=18, File=20260118_110833_test_photo.png
+2026-01-18 11:08:33,309 - INFO - User created: 19 - folder created at dataset/19
+2026-01-18 11:08:33,335 - INFO - User created: 20 - folder created at dataset/20
+2026-01-18 11:08:33,371 - INFO - User created: 21 - folder created at dataset/21
+2026-01-18 11:08:33,394 - INFO - Photo uploaded: ID=9, User=21, File=20260118_110833_test.jpg
+2026-01-18 11:08:33,422 - INFO - User created: 22 - folder created at dataset/22
+2026-01-18 11:08:33,445 - INFO - Photo uploaded: ID=10, User=22, File=20260118_110833_photo1.jpg
+2026-01-18 11:08:33,475 - INFO - Photo uploaded: ID=11, User=22, File=20260118_110833_photo2.png
+2026-01-18 11:08:33,475 - INFO - Multiple photos uploaded: User=22, Success=2, Failed=0
+2026-01-18 11:08:33,506 - INFO - User created: 23 - folder created at dataset/23
+2026-01-18 11:08:33,588 - INFO - User created: 24 - folder created at dataset/24
+2026-01-18 11:08:33,610 - INFO - Photo uploaded: ID=12, User=24, File=20260118_110833_valid.jpg
+2026-01-18 11:08:33,610 - INFO - Multiple photos uploaded: User=24, Success=1, Failed=1
+2026-01-18 11:08:33,645 - INFO - User created: 25 - folder created at dataset/25
+2026-01-18 11:08:33,676 - INFO - User created: 26 - folder created at dataset/26
+2026-01-18 11:08:33,701 - INFO - Photo uploaded: ID=13, User=26, File=20260118_110833_photo1.jpg
+2026-01-18 11:08:33,728 - INFO - Photo uploaded: ID=14, User=26, File=20260118_110833_photo2.png
+2026-01-18 11:08:33,771 - INFO - User created: 27 - folder created at dataset/27
+2026-01-18 11:08:33,797 - INFO - Photo uploaded: ID=15, User=27, File=20260118_110833_test.jpg
+2026-01-18 11:08:33,810 - INFO - Photo deleted: ID=15, File=dataset/27/20260118_110833_test.jpg
+2026-01-18 11:08:33,829 - INFO - User created: 28 - folder created at dataset/28
+2026-01-18 11:08:33,853 - INFO - User created: 29 - folder created at dataset/29
+2026-01-18 11:08:33,860 - INFO - User created: 30 - folder created at dataset/30
+2026-01-18 11:08:33,882 - INFO - Photo uploaded: ID=16, User=29, File=20260118_110833_test.jpg
+2026-01-18 11:08:33,939 - INFO - User created: 31 - folder created at dataset/31
+2026-01-18 11:08:33,962 - INFO - Photo uploaded: ID=17, User=31, File=20260118_110833_test.jpg
+2026-01-18 11:08:33,982 - INFO - Photo deleted: ID=17, File=dataset/31/20260118_110833_test.jpg
+2026-01-18 11:08:34,009 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-18 11:08:34,010 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-18 11:08:53,853 - INFO - User created: 32 - folder created at dataset/32
+2026-01-18 11:08:53,888 - INFO - Photo uploaded: ID=18, User=32, File=20260118_110853_test_photo.jpg
+2026-01-18 11:08:53,926 - INFO - User created: 33 - folder created at dataset/33
+2026-01-18 11:08:53,958 - INFO - Photo uploaded: ID=19, User=33, File=20260118_110853_test_photo.png
+2026-01-18 11:08:53,989 - INFO - User created: 34 - folder created at dataset/34
+2026-01-18 11:08:54,021 - INFO - User created: 35 - folder created at dataset/35
+2026-01-18 11:08:54,070 - INFO - User created: 36 - folder created at dataset/36
+2026-01-18 11:08:54,097 - INFO - Photo uploaded: ID=20, User=36, File=20260118_110854_test.jpg
+2026-01-18 11:08:54,134 - INFO - User created: 37 - folder created at dataset/37
+2026-01-18 11:08:54,163 - INFO - Photo uploaded: ID=21, User=37, File=20260118_110854_photo1.jpg
+2026-01-18 11:08:54,186 - INFO - Photo uploaded: ID=22, User=37, File=20260118_110854_photo2.png
+2026-01-18 11:08:54,187 - INFO - Multiple photos uploaded: User=37, Success=2, Failed=0
+2026-01-18 11:08:54,206 - INFO - User created: 38 - folder created at dataset/38
+2026-01-18 11:08:54,256 - INFO - User created: 39 - folder created at dataset/39
+2026-01-18 11:08:54,281 - INFO - Photo uploaded: ID=23, User=39, File=20260118_110854_valid.jpg
+2026-01-18 11:08:54,282 - INFO - Multiple photos uploaded: User=39, Success=1, Failed=1
+2026-01-18 11:08:54,312 - INFO - User created: 40 - folder created at dataset/40
+2026-01-18 11:08:54,349 - INFO - User created: 41 - folder created at dataset/41
+2026-01-18 11:08:54,375 - INFO - Photo uploaded: ID=24, User=41, File=20260118_110854_photo1.jpg
+2026-01-18 11:08:54,399 - INFO - Photo uploaded: ID=25, User=41, File=20260118_110854_photo2.png
+2026-01-18 11:08:54,426 - INFO - User created: 42 - folder created at dataset/42
+2026-01-18 11:08:54,452 - INFO - Photo uploaded: ID=26, User=42, File=20260118_110854_test.jpg
+2026-01-18 11:08:54,467 - INFO - Photo deleted: ID=26, File=dataset/42/20260118_110854_test.jpg
+2026-01-18 11:08:54,483 - INFO - User created: 43 - folder created at dataset/43
+2026-01-18 11:08:54,506 - INFO - User created: 44 - folder created at dataset/44
+2026-01-18 11:08:54,506 - ERROR - Integrity Error: UNIQUE constraint failed: users.email
+2026-01-18 11:08:54,554 - INFO - User created: 45 - folder created at dataset/45
+2026-01-18 11:08:54,579 - INFO - Photo uploaded: ID=27, User=45, File=20260118_110854_test.jpg
+2026-01-18 11:08:54,598 - INFO - Photo deleted: ID=27, File=dataset/45/20260118_110854_test.jpg
+2026-01-18 11:08:54,640 - INFO - User created: 46 - folder created at dataset/46
+2026-01-18 11:08:54,649 - INFO - User created: 47 - folder created at dataset/47
+2026-01-18 11:08:54,682 - INFO - Photo uploaded: ID=28, User=46, File=20260118_110854_user1_photo.jpg
+2026-01-18 11:08:54,712 - INFO - Photo uploaded: ID=29, User=47, File=20260118_110854_user2_photo.png
+2026-01-18 11:09:09,726 - INFO - User created: 48 - folder created at dataset/48
+2026-01-18 11:09:09,758 - INFO - Photo uploaded: ID=30, User=48, File=20260118_110909_test_photo.jpg
+2026-01-18 11:09:09,792 - INFO - User created: 49 - folder created at dataset/49
+2026-01-18 11:09:09,818 - INFO - Photo uploaded: ID=31, User=49, File=20260118_110909_test_photo.png
+2026-01-18 11:09:09,844 - INFO - User created: 50 - folder created at dataset/50
+2026-01-18 11:09:09,886 - INFO - User created: 51 - folder created at dataset/51
+2026-01-18 11:09:09,950 - INFO - User created: 52 - folder created at dataset/52
+2026-01-18 11:09:09,980 - INFO - Photo uploaded: ID=32, User=52, File=20260118_110909_test.jpg
+2026-01-18 11:09:10,051 - INFO - User created: 53 - folder created at dataset/53
+2026-01-18 11:09:10,083 - INFO - Photo uploaded: ID=33, User=53, File=20260118_110910_photo1.jpg
+2026-01-18 11:09:10,113 - INFO - Photo uploaded: ID=34, User=53, File=20260118_110910_photo2.png
+2026-01-18 11:09:10,114 - INFO - Multiple photos uploaded: User=53, Success=2, Failed=0
+2026-01-18 11:09:10,144 - INFO - User created: 54 - folder created at dataset/54
+2026-01-18 11:09:10,210 - INFO - User created: 55 - folder created at dataset/55
+2026-01-18 11:09:10,238 - INFO - Photo uploaded: ID=35, User=55, File=20260118_110910_valid.jpg
+2026-01-18 11:09:10,239 - INFO - Multiple photos uploaded: User=55, Success=1, Failed=1
+2026-01-18 11:09:10,282 - INFO - User created: 56 - folder created at dataset/56
+2026-01-18 11:09:10,325 - INFO - User created: 57 - folder created at dataset/57
+2026-01-18 11:09:10,351 - INFO - Photo uploaded: ID=36, User=57, File=20260118_110910_photo1.jpg
+2026-01-18 11:09:10,377 - INFO - Photo uploaded: ID=37, User=57, File=20260118_110910_photo2.png
+2026-01-18 11:09:10,421 - INFO - User created: 58 - folder created at dataset/58
+2026-01-18 11:09:10,452 - INFO - Photo uploaded: ID=38, User=58, File=20260118_110910_test.jpg
+2026-01-18 11:09:10,470 - INFO - Photo deleted: ID=38, File=dataset/58/20260118_110910_test.jpg
+2026-01-18 11:09:10,496 - INFO - User created: 59 - folder created at dataset/59
+2026-01-18 11:09:10,529 - INFO - User created: 60 - folder created at dataset/60
+2026-01-18 11:09:10,537 - INFO - User created: 61 - folder created at dataset/61
+2026-01-18 11:09:10,566 - INFO - Photo uploaded: ID=39, User=60, File=20260118_110910_test.jpg
+2026-01-18 11:09:10,624 - INFO - User created: 62 - folder created at dataset/62
+2026-01-18 11:09:10,652 - INFO - Photo uploaded: ID=40, User=62, File=20260118_110910_test.jpg
+2026-01-18 11:09:10,667 - INFO - Photo deleted: ID=40, File=dataset/62/20260118_110910_test.jpg
+2026-01-18 11:09:10,717 - INFO - User created: 63 - folder created at dataset/63
+2026-01-18 11:09:10,730 - INFO - User created: 64 - folder created at dataset/64
+2026-01-18 11:09:10,755 - INFO - Photo uploaded: ID=41, User=63, File=20260118_110910_user1_photo.jpg
+2026-01-18 11:09:10,786 - INFO - Photo uploaded: ID=42, User=64, File=20260118_110910_user2_photo.png
+2026-01-18 11:09:17,082 - INFO - User created: 65 - folder created at dataset/65
+2026-01-18 11:09:29,186 - INFO - User created: 66 - folder created at dataset/66
+2026-01-18 11:09:29,217 - INFO - Photo uploaded: ID=43, User=66, File=20260118_110929_test_photo.jpg
+2026-01-18 11:09:29,246 - INFO - User created: 67 - folder created at dataset/67
+2026-01-18 11:09:29,278 - INFO - Photo uploaded: ID=44, User=67, File=20260118_110929_test_photo.png
+2026-01-18 11:09:29,311 - INFO - User created: 68 - folder created at dataset/68
+2026-01-18 11:09:29,345 - INFO - User created: 69 - folder created at dataset/69
+2026-01-18 11:09:29,406 - INFO - User created: 70 - folder created at dataset/70
+2026-01-18 11:09:29,440 - INFO - Photo uploaded: ID=45, User=70, File=20260118_110929_test.jpg
+2026-01-18 11:09:29,477 - INFO - User created: 71 - folder created at dataset/71
+2026-01-18 11:09:29,509 - INFO - Photo uploaded: ID=46, User=71, File=20260118_110929_photo1.jpg
+2026-01-18 11:09:29,534 - INFO - Photo uploaded: ID=47, User=71, File=20260118_110929_photo2.png
+2026-01-18 11:09:29,534 - INFO - Multiple photos uploaded: User=71, Success=2, Failed=0
+2026-01-18 11:09:29,559 - INFO - User created: 72 - folder created at dataset/72
+2026-01-18 11:09:29,584 - INFO - User created: 73 - folder created at dataset/73
+2026-01-18 11:09:29,612 - INFO - Photo uploaded: ID=48, User=73, File=20260118_110929_valid.jpg
+2026-01-18 11:09:29,612 - INFO - Multiple photos uploaded: User=73, Success=1, Failed=1
+2026-01-18 11:09:29,649 - INFO - User created: 74 - folder created at dataset/74
+2026-01-18 11:09:29,683 - INFO - User created: 75 - folder created at dataset/75
+2026-01-18 11:09:29,711 - INFO - Photo uploaded: ID=49, User=75, File=20260118_110929_photo1.jpg
+2026-01-18 11:09:29,737 - INFO - Photo uploaded: ID=50, User=75, File=20260118_110929_photo2.png
+2026-01-18 11:09:29,785 - INFO - User created: 76 - folder created at dataset/76
+2026-01-18 11:09:29,811 - INFO - Photo uploaded: ID=51, User=76, File=20260118_110929_test.jpg
+2026-01-18 11:09:29,826 - INFO - Photo deleted: ID=51, File=dataset/76/20260118_110929_test.jpg
+2026-01-18 11:09:29,858 - INFO - User created: 77 - folder created at dataset/77
+2026-01-18 11:09:29,889 - INFO - User created: 78 - folder created at dataset/78
+2026-01-18 11:09:29,900 - INFO - User created: 79 - folder created at dataset/79
+2026-01-18 11:09:29,931 - INFO - Photo uploaded: ID=52, User=78, File=20260118_110929_test.jpg
+2026-01-18 11:09:29,976 - INFO - User created: 80 - folder created at dataset/80
+2026-01-18 11:09:30,004 - INFO - Photo uploaded: ID=53, User=80, File=20260118_110929_test.jpg
+2026-01-18 11:09:30,020 - INFO - Photo deleted: ID=53, File=dataset/80/20260118_110929_test.jpg
+2026-01-18 11:09:30,069 - INFO - User created: 81 - folder created at dataset/81
+2026-01-18 11:09:30,085 - INFO - User created: 82 - folder created at dataset/82
+2026-01-18 11:09:30,118 - INFO - Photo uploaded: ID=54, User=81, File=20260118_110930_user1_photo.jpg
+2026-01-18 11:09:30,154 - INFO - Photo uploaded: ID=55, User=82, File=20260118_110930_user2_photo.png
+2026-01-18 11:09:57,414 - INFO - User created: 83 - folder created at dataset/83
+2026-01-18 11:09:57,461 - INFO - Photo uploaded: ID=56, User=83, File=20260118_110957_test_photo.jpg
+2026-01-18 11:09:57,495 - INFO - User created: 84 - folder created at dataset/84
+2026-01-18 11:09:57,533 - INFO - Photo uploaded: ID=57, User=84, File=20260118_110957_test_photo.png
+2026-01-18 11:09:57,579 - INFO - User created: 85 - folder created at dataset/85
+2026-01-18 11:09:57,639 - INFO - User created: 86 - folder created at dataset/86
+2026-01-18 11:09:57,714 - INFO - User created: 87 - folder created at dataset/87
+2026-01-18 11:09:57,750 - INFO - Photo uploaded: ID=58, User=87, File=20260118_110957_test.jpg
+2026-01-18 11:09:57,804 - INFO - User created: 88 - folder created at dataset/88
+2026-01-18 11:09:57,835 - INFO - Photo uploaded: ID=59, User=88, File=20260118_110957_photo1.jpg
+2026-01-18 11:09:57,862 - INFO - Photo uploaded: ID=60, User=88, File=20260118_110957_photo2.png
+2026-01-18 11:09:57,862 - INFO - Multiple photos uploaded: User=88, Success=2, Failed=0
+2026-01-18 11:09:57,888 - INFO - User created: 89 - folder created at dataset/89
+2026-01-18 11:09:57,917 - INFO - User created: 90 - folder created at dataset/90
+2026-01-18 11:09:57,941 - INFO - Photo uploaded: ID=61, User=90, File=20260118_110957_valid.jpg
+2026-01-18 11:09:57,942 - INFO - Multiple photos uploaded: User=90, Success=1, Failed=1
+2026-01-18 11:09:57,985 - INFO - User created: 91 - folder created at dataset/91
+2026-01-18 11:09:58,025 - INFO - User created: 92 - folder created at dataset/92
+2026-01-18 11:09:58,055 - INFO - Photo uploaded: ID=62, User=92, File=20260118_110958_photo1.jpg
+2026-01-18 11:09:58,081 - INFO - Photo uploaded: ID=63, User=92, File=20260118_110958_photo2.png
+2026-01-18 11:09:58,132 - INFO - User created: 93 - folder created at dataset/93
+2026-01-18 11:09:58,156 - INFO - Photo uploaded: ID=64, User=93, File=20260118_110958_test.jpg
+2026-01-18 11:09:58,165 - INFO - Photo deleted: ID=64, File=dataset/93/20260118_110958_test.jpg
+2026-01-18 11:09:58,194 - INFO - User created: 94 - folder created at dataset/94
+2026-01-18 11:09:58,224 - INFO - User created: 95 - folder created at dataset/95
+2026-01-18 11:09:58,237 - INFO - User created: 96 - folder created at dataset/96
+2026-01-18 11:09:58,261 - INFO - Photo uploaded: ID=65, User=95, File=20260118_110958_test.jpg
+2026-01-18 11:09:58,306 - INFO - User created: 97 - folder created at dataset/97
+2026-01-18 11:09:58,332 - INFO - Photo uploaded: ID=66, User=97, File=20260118_110958_test.jpg
+2026-01-18 11:09:58,344 - INFO - Photo deleted: ID=66, File=dataset/97/20260118_110958_test.jpg
+2026-01-18 11:09:58,393 - INFO - User created: 98 - folder created at dataset/98
+2026-01-18 11:09:58,404 - INFO - User created: 99 - folder created at dataset/99
+2026-01-18 11:09:58,442 - INFO - Photo uploaded: ID=67, User=98, File=20260118_110958_user1_photo.jpg
+2026-01-18 11:09:58,464 - INFO - Photo uploaded: ID=68, User=99, File=20260118_110958_user2_photo.png
+2026-01-18 11:16:25,712 - INFO - User deleted: 99 - folder removed dataset/99
+2026-01-18 11:16:29,922 - INFO - User deleted: 98 - folder removed dataset/98
+2026-01-18 11:16:36,583 - INFO - User deleted: 97 - folder removed dataset/97
+2026-01-18 11:16:41,531 - INFO - User deleted: 96 - folder removed dataset/96
+2026-01-18 11:16:45,107 - INFO - User deleted: 95 - folder removed dataset/95
+2026-01-18 11:16:48,415 - INFO - User deleted: 94 - folder removed dataset/94
+2026-01-18 11:16:51,679 - INFO - User deleted: 93 - folder removed dataset/93
+2026-01-18 11:17:00,123 - INFO - User deleted: 92 - folder removed dataset/92
+2026-01-18 11:40:00,047 - INFO - User deleted: 17 - folder removed dataset/17
+2026-01-18 11:40:04,536 - INFO - User deleted: 18 - folder removed dataset/18
+2026-01-18 11:40:07,268 - INFO - User deleted: 19 - folder removed dataset/19
+2026-01-18 11:40:10,395 - INFO - User deleted: 20 - folder removed dataset/20
+2026-01-18 11:40:13,856 - INFO - User deleted: 21 - folder removed dataset/21
+2026-01-18 11:40:18,025 - INFO - User deleted: 22 - folder removed dataset/22
+2026-01-18 11:40:21,334 - INFO - User deleted: 23 - folder removed dataset/23
+2026-01-18 11:40:24,364 - INFO - User deleted: 24 - folder removed dataset/24
+2026-01-18 11:40:27,163 - INFO - User deleted: 25 - folder removed dataset/25
+2026-01-18 11:40:30,821 - INFO - User deleted: 26 - folder removed dataset/26
+2026-01-18 11:40:34,189 - INFO - User deleted: 27 - folder removed dataset/27
+2026-01-18 11:40:38,089 - INFO - User deleted: 28 - folder removed dataset/28
+2026-01-18 11:40:41,417 - INFO - User deleted: 29 - folder removed dataset/29
+2026-01-18 11:40:45,301 - INFO - User deleted: 30 - folder removed dataset/30
+2026-01-18 11:40:48,243 - INFO - User deleted: 31 - folder removed dataset/31
+2026-01-18 11:40:51,941 - INFO - User deleted: 32 - folder removed dataset/32
+2026-01-18 11:41:42,426 - INFO - User deleted: 33 - folder removed dataset/33
+2026-01-18 11:41:48,020 - INFO - User deleted: 34 - folder removed dataset/34
+2026-01-18 11:41:52,747 - INFO - User deleted: 35 - folder removed dataset/35
+2026-01-18 11:42:19,194 - INFO - User deleted: 16 - folder removed dataset/16
+2026-01-18 11:42:22,376 - INFO - User deleted: 36 - folder removed dataset/36
+2026-01-18 11:42:24,833 - INFO - User deleted: 37 - folder removed dataset/37
+2026-01-18 11:42:27,810 - INFO - User deleted: 38 - folder removed dataset/38
+2026-01-18 11:42:33,131 - INFO - User deleted: 91 - folder removed dataset/91
+2026-01-18 11:42:35,956 - INFO - User deleted: 89 - folder removed dataset/89
+2026-01-18 11:42:39,495 - INFO - User deleted: 88 - folder removed dataset/88
+2026-01-18 11:42:43,122 - INFO - User deleted: 87 - folder removed dataset/87
+2026-01-18 11:42:47,491 - INFO - User deleted: 90 - folder removed dataset/90
+2026-01-18 11:42:52,264 - INFO - User deleted: 86 - folder removed dataset/86
+2026-01-18 11:42:57,001 - INFO - User deleted: 85 - folder removed dataset/85
+2026-01-18 11:43:00,779 - INFO - User deleted: 80 - folder removed dataset/80
+2026-01-18 11:43:03,388 - INFO - User deleted: 78 - folder removed dataset/78
+2026-01-18 11:43:06,965 - INFO - User deleted: 77 - folder removed dataset/77
+2026-01-18 11:48:06,115 - INFO - User created: 1 - folder created at dataset/1
+2026-01-18 11:48:33,744 - INFO - Photo uploaded: ID=1, User=1, File=20260118_114833_cat.jpeg
+2026-01-18 11:49:15,659 - INFO - User created: 2 - folder created at dataset/2
+2026-01-18 11:54:12,520 - INFO - Photo uploaded: ID=2, User=2, File=20260118_115412_subject15.wink.gif
+2026-01-18 11:54:39,739 - INFO - Photo deleted: ID=2, File=dataset/2/20260118_115412_subject15.wink.gif
+2026-01-18 12:00:49,012 - INFO - Photo uploaded: ID=3, User=2, File=20260118_120048_subject01.centerlight.gif
+2026-01-18 12:00:49,030 - INFO - Photo uploaded: ID=4, User=2, File=20260118_120049_subject01.glasses.gif
+2026-01-18 12:00:49,047 - INFO - Photo uploaded: ID=5, User=2, File=20260118_120049_subject01.happy.gif
+2026-01-18 12:00:49,067 - INFO - Photo uploaded: ID=6, User=2, File=20260118_120049_subject01.leftlight.gif
+2026-01-18 12:00:49,086 - INFO - Photo uploaded: ID=7, User=2, File=20260118_120049_subject01.noglasses.gif
+2026-01-18 12:00:49,104 - INFO - Photo uploaded: ID=8, User=2, File=20260118_120049_subject01.normal.gif
+2026-01-18 12:00:49,131 - INFO - Photo uploaded: ID=9, User=2, File=20260118_120049_subject01.rightlight.gif
+2026-01-18 12:00:49,148 - INFO - Photo uploaded: ID=10, User=2, File=20260118_120049_subject01.sad.gif
+2026-01-18 12:00:49,167 - INFO - Photo uploaded: ID=11, User=2, File=20260118_120049_subject01.sleepy.gif
+2026-01-18 12:00:49,183 - INFO - Photo uploaded: ID=12, User=2, File=20260118_120049_subject01.surprised.gif
+2026-01-18 12:00:49,202 - INFO - Photo uploaded: ID=13, User=2, File=20260118_120049_subject01.wink.gif
+2026-01-18 12:00:49,202 - INFO - Multiple photos uploaded: User=2, Success=11, Failed=0
+2026-01-18 12:01:21,029 - INFO - User created: 3 - folder created at dataset/3
+2026-01-18 12:01:40,420 - INFO - Photo uploaded: ID=14, User=3, File=20260118_120140_subject02.centerlight.gif
+2026-01-18 12:01:40,438 - INFO - Photo uploaded: ID=15, User=3, File=20260118_120140_subject02.glasses.gif
+2026-01-18 12:01:40,456 - INFO - Photo uploaded: ID=16, User=3, File=20260118_120140_subject02.happy.gif
+2026-01-18 12:01:40,476 - INFO - Photo uploaded: ID=17, User=3, File=20260118_120140_subject02.leftlight.gif
+2026-01-18 12:01:40,502 - INFO - Photo uploaded: ID=18, User=3, File=20260118_120140_subject02.noglasses.gif
+2026-01-18 12:01:40,520 - INFO - Photo uploaded: ID=19, User=3, File=20260118_120140_subject02.normal.gif
+2026-01-18 12:01:40,542 - INFO - Photo uploaded: ID=20, User=3, File=20260118_120140_subject02.rightlight.gif
+2026-01-18 12:01:40,561 - INFO - Photo uploaded: ID=21, User=3, File=20260118_120140_subject02.sad.gif
+2026-01-18 12:01:40,580 - INFO - Photo uploaded: ID=22, User=3, File=20260118_120140_subject02.sleepy.gif
+2026-01-18 12:01:40,600 - INFO - Photo uploaded: ID=23, User=3, File=20260118_120140_subject02.surprised.gif
+2026-01-18 12:01:40,621 - INFO - Photo uploaded: ID=24, User=3, File=20260118_120140_subject02.wink.gif
+2026-01-18 12:01:40,621 - INFO - Multiple photos uploaded: User=3, Success=11, Failed=0
+2026-01-18 12:03:29,235 - INFO - User created: 4 - folder created at dataset/4
+2026-01-18 12:03:52,409 - INFO - Photo uploaded: ID=25, User=4, File=20260118_120352_subject03.centerlight.gif
+2026-01-18 12:03:52,426 - INFO - Photo uploaded: ID=26, User=4, File=20260118_120352_subject03.glasses.gif
+2026-01-18 12:03:52,444 - INFO - Photo uploaded: ID=27, User=4, File=20260118_120352_subject03.happy.gif
+2026-01-18 12:03:52,466 - INFO - Photo uploaded: ID=28, User=4, File=20260118_120352_subject03.leftlight.gif
+2026-01-18 12:03:52,485 - INFO - Photo uploaded: ID=29, User=4, File=20260118_120352_subject03.noglasses.gif
+2026-01-18 12:03:52,503 - INFO - Photo uploaded: ID=30, User=4, File=20260118_120352_subject03.normal.gif
+2026-01-18 12:03:52,529 - INFO - Photo uploaded: ID=31, User=4, File=20260118_120352_subject03.rightlight.gif
+2026-01-18 12:03:52,546 - INFO - Photo uploaded: ID=32, User=4, File=20260118_120352_subject03.sad.gif
+2026-01-18 12:03:52,563 - INFO - Photo uploaded: ID=33, User=4, File=20260118_120352_subject03.sleepy.gif
+2026-01-18 12:03:52,582 - INFO - Photo uploaded: ID=34, User=4, File=20260118_120352_subject03.surprised.gif
+2026-01-18 12:03:52,599 - INFO - Photo uploaded: ID=35, User=4, File=20260118_120352_subject03.wink.gif
+2026-01-18 12:03:52,599 - INFO - Multiple photos uploaded: User=4, Success=11, Failed=0
+2026-01-18 12:36:51,037 - INFO - User deleted: 1 - folder removed dataset/1
+2026-01-21 17:51:14,977 - INFO - User created: 1 - folder created at dataset/1
+2026-01-21 17:51:24,369 - INFO - User created: 2 - folder created at dataset/2
+2026-01-21 17:51:35,126 - INFO - User created: 3 - folder created at dataset/3
+2026-01-21 17:52:08,946 - INFO - Photo uploaded: ID=1, User=1, File=20260121_175208_subject01.centerlight.jpg
+2026-01-21 17:52:08,989 - INFO - Photo uploaded: ID=2, User=1, File=20260121_175208_subject01.glasses.jpg
+2026-01-21 17:52:09,014 - INFO - Photo uploaded: ID=3, User=1, File=20260121_175208_subject01.happy.jpg
+2026-01-21 17:52:09,043 - INFO - Photo uploaded: ID=4, User=1, File=20260121_175209_subject01.leftlight.jpg
+2026-01-21 17:52:09,070 - INFO - Photo uploaded: ID=5, User=1, File=20260121_175209_subject01.noglasses.jpg
+2026-01-21 17:52:09,094 - INFO - Photo uploaded: ID=6, User=1, File=20260121_175209_subject01.normal.jpg
+2026-01-21 17:52:09,131 - INFO - Photo uploaded: ID=7, User=1, File=20260121_175209_subject01.rightlight.jpg
+2026-01-21 17:52:09,158 - INFO - Photo uploaded: ID=8, User=1, File=20260121_175209_subject01.sad.jpg
+2026-01-21 17:52:09,191 - INFO - Photo uploaded: ID=9, User=1, File=20260121_175209_subject01.sleepy.jpg
+2026-01-21 17:52:09,227 - INFO - Photo uploaded: ID=10, User=1, File=20260121_175209_subject01.surprised.jpg
+2026-01-21 17:52:09,253 - INFO - Photo uploaded: ID=11, User=1, File=20260121_175209_subject01.wink.jpg
+2026-01-21 17:52:09,253 - INFO - Multiple photos uploaded: User=1, Success=11, Failed=0
+2026-01-21 17:52:45,343 - INFO - Photo uploaded: ID=12, User=2, File=20260121_175245_subject02.centerlight.jpg
+2026-01-21 17:52:45,370 - INFO - Photo uploaded: ID=13, User=2, File=20260121_175245_subject02.glasses.jpg
+2026-01-21 17:52:45,396 - INFO - Photo uploaded: ID=14, User=2, File=20260121_175245_subject02.happy.jpg
+2026-01-21 17:52:45,421 - INFO - Photo uploaded: ID=15, User=2, File=20260121_175245_subject02.leftlight.jpg
+2026-01-21 17:52:45,448 - INFO - Photo uploaded: ID=16, User=2, File=20260121_175245_subject02.noglasses.jpg
+2026-01-21 17:52:45,475 - INFO - Photo uploaded: ID=17, User=2, File=20260121_175245_subject02.normal.jpg
+2026-01-21 17:52:45,510 - INFO - Photo uploaded: ID=18, User=2, File=20260121_175245_subject02.rightlight.jpg
+2026-01-21 17:52:45,536 - INFO - Photo uploaded: ID=19, User=2, File=20260121_175245_subject02.sad.jpg
+2026-01-21 17:52:45,565 - INFO - Photo uploaded: ID=20, User=2, File=20260121_175245_subject02.sleepy.jpg
+2026-01-21 17:52:45,592 - INFO - Photo uploaded: ID=21, User=2, File=20260121_175245_subject02.surprised.jpg
+2026-01-21 17:52:45,618 - INFO - Photo uploaded: ID=22, User=2, File=20260121_175245_subject02.wink.jpg
+2026-01-21 17:52:45,618 - INFO - Multiple photos uploaded: User=2, Success=11, Failed=0
+2026-01-21 17:53:15,393 - INFO - Photo uploaded: ID=23, User=3, File=20260121_175315_subject03.centerlight.jpg
+2026-01-21 17:53:15,418 - INFO - Photo uploaded: ID=24, User=3, File=20260121_175315_subject03.glasses.jpg
+2026-01-21 17:53:15,440 - INFO - Photo uploaded: ID=25, User=3, File=20260121_175315_subject03.happy.jpg
+2026-01-21 17:53:15,465 - INFO - Photo uploaded: ID=26, User=3, File=20260121_175315_subject03.leftlight.jpg
+2026-01-21 17:53:15,487 - INFO - Photo uploaded: ID=27, User=3, File=20260121_175315_subject03.noglasses.jpg
+2026-01-21 17:53:15,509 - INFO - Photo uploaded: ID=28, User=3, File=20260121_175315_subject03.normal.jpg
+2026-01-21 17:53:15,544 - INFO - Photo uploaded: ID=29, User=3, File=20260121_175315_subject03.rightlight.jpg
+2026-01-21 17:53:15,566 - INFO - Photo uploaded: ID=30, User=3, File=20260121_175315_subject03.sad.jpg
+2026-01-21 17:53:15,589 - INFO - Photo uploaded: ID=31, User=3, File=20260121_175315_subject03.sleepy.jpg
+2026-01-21 17:53:15,611 - INFO - Photo uploaded: ID=32, User=3, File=20260121_175315_subject03.surprised.jpg
+2026-01-21 17:53:15,636 - INFO - Photo uploaded: ID=33, User=3, File=20260121_175315_subject03.wink.jpg
+2026-01-21 17:53:15,636 - INFO - Multiple photos uploaded: User=3, Success=11, Failed=0
+2026-01-21 19:48:36,232 - INFO - Photo deleted: ID=11, File=dataset/1/20260121_175209_subject01.wink.jpg
+2026-01-21 19:48:37,248 - INFO - Photo deleted: ID=10, File=dataset/1/20260121_175209_subject01.surprised.jpg
+2026-01-21 19:48:38,391 - INFO - Photo deleted: ID=9, File=dataset/1/20260121_175209_subject01.sleepy.jpg
+2026-01-21 19:48:39,294 - INFO - Photo deleted: ID=8, File=dataset/1/20260121_175209_subject01.sad.jpg
+2026-01-21 19:48:40,115 - INFO - Photo deleted: ID=7, File=dataset/1/20260121_175209_subject01.rightlight.jpg
+2026-01-21 19:48:40,896 - INFO - Photo deleted: ID=6, File=dataset/1/20260121_175209_subject01.normal.jpg
+2026-01-21 19:48:41,686 - INFO - Photo deleted: ID=5, File=dataset/1/20260121_175209_subject01.noglasses.jpg
+2026-01-21 19:48:43,711 - INFO - Photo deleted: ID=4, File=dataset/1/20260121_175209_subject01.leftlight.jpg
+2026-01-21 19:48:44,553 - INFO - Photo deleted: ID=3, File=dataset/1/20260121_175208_subject01.happy.jpg
+2026-01-21 19:48:45,382 - INFO - Photo deleted: ID=2, File=dataset/1/20260121_175208_subject01.glasses.jpg
+2026-01-21 19:48:46,112 - INFO - Photo deleted: ID=1, File=dataset/1/20260121_175208_subject01.centerlight.jpg
+2026-01-21 19:48:52,038 - INFO - Photo deleted: ID=22, File=dataset/2/20260121_175245_subject02.wink.jpg
+2026-01-21 19:48:52,853 - INFO - Photo deleted: ID=21, File=dataset/2/20260121_175245_subject02.surprised.jpg
+2026-01-21 19:48:53,646 - INFO - Photo deleted: ID=20, File=dataset/2/20260121_175245_subject02.sleepy.jpg
+2026-01-21 19:48:55,592 - INFO - Photo deleted: ID=19, File=dataset/2/20260121_175245_subject02.sad.jpg
+2026-01-21 19:48:56,495 - INFO - Photo deleted: ID=18, File=dataset/2/20260121_175245_subject02.rightlight.jpg
+2026-01-21 19:48:57,302 - INFO - Photo deleted: ID=17, File=dataset/2/20260121_175245_subject02.normal.jpg
+2026-01-21 19:48:58,041 - INFO - Photo deleted: ID=16, File=dataset/2/20260121_175245_subject02.noglasses.jpg
+2026-01-21 19:48:59,679 - INFO - Photo deleted: ID=15, File=dataset/2/20260121_175245_subject02.leftlight.jpg
+2026-01-21 19:49:01,189 - INFO - Photo deleted: ID=14, File=dataset/2/20260121_175245_subject02.happy.jpg
+2026-01-21 19:49:02,040 - INFO - Photo deleted: ID=13, File=dataset/2/20260121_175245_subject02.glasses.jpg
+2026-01-21 19:49:02,828 - INFO - Photo deleted: ID=12, File=dataset/2/20260121_175245_subject02.centerlight.jpg
+2026-01-21 19:49:19,849 - INFO - Photo deleted: ID=33, File=dataset/3/20260121_175315_subject03.wink.jpg
+2026-01-21 19:49:20,583 - INFO - Photo deleted: ID=32, File=dataset/3/20260121_175315_subject03.surprised.jpg
+2026-01-21 19:49:21,313 - INFO - Photo deleted: ID=31, File=dataset/3/20260121_175315_subject03.sleepy.jpg
+2026-01-21 19:49:23,033 - INFO - Photo deleted: ID=30, File=dataset/3/20260121_175315_subject03.sad.jpg
+2026-01-21 19:49:23,816 - INFO - Photo deleted: ID=29, File=dataset/3/20260121_175315_subject03.rightlight.jpg
+2026-01-21 19:49:24,544 - INFO - Photo deleted: ID=28, File=dataset/3/20260121_175315_subject03.normal.jpg
+2026-01-21 19:49:25,275 - INFO - Photo deleted: ID=27, File=dataset/3/20260121_175315_subject03.noglasses.jpg
+2026-01-21 19:49:27,343 - INFO - Photo deleted: ID=26, File=dataset/3/20260121_175315_subject03.leftlight.jpg
+2026-01-21 19:49:28,156 - INFO - Photo deleted: ID=25, File=dataset/3/20260121_175315_subject03.happy.jpg
+2026-01-21 19:49:28,883 - INFO - Photo deleted: ID=24, File=dataset/3/20260121_175315_subject03.glasses.jpg
+2026-01-21 19:49:29,688 - INFO - Photo deleted: ID=23, File=dataset/3/20260121_175315_subject03.centerlight.jpg
+2026-01-21 19:49:51,598 - INFO - Photo uploaded: ID=34, User=3, File=20260121_194951_subject03.centerlight.jpg
+2026-01-21 19:49:51,621 - INFO - Photo uploaded: ID=35, User=3, File=20260121_194951_subject03.glasses.jpg
+2026-01-21 19:49:51,643 - INFO - Photo uploaded: ID=36, User=3, File=20260121_194951_subject03.happy.jpg
+2026-01-21 19:49:51,665 - INFO - Photo uploaded: ID=37, User=3, File=20260121_194951_subject03.leftlight.jpg
+2026-01-21 19:49:51,685 - INFO - Photo uploaded: ID=38, User=3, File=20260121_194951_subject03.noglasses.jpg
+2026-01-21 19:49:51,707 - INFO - Photo uploaded: ID=39, User=3, File=20260121_194951_subject03.normal.jpg
+2026-01-21 19:49:51,735 - INFO - Photo uploaded: ID=40, User=3, File=20260121_194951_subject03.rightlight.jpg
+2026-01-21 19:49:51,758 - INFO - Photo uploaded: ID=41, User=3, File=20260121_194951_subject03.sad.jpg
+2026-01-21 19:49:51,779 - INFO - Photo uploaded: ID=42, User=3, File=20260121_194951_subject03.sleepy.jpg
+2026-01-21 19:49:51,803 - INFO - Photo uploaded: ID=43, User=3, File=20260121_194951_subject03.surprised.jpg
+2026-01-21 19:49:51,827 - INFO - Photo uploaded: ID=44, User=3, File=20260121_194951_subject03.wink.jpg
+2026-01-21 19:49:51,827 - INFO - Multiple photos uploaded: User=3, Success=11, Failed=0
+2026-01-21 19:50:07,564 - INFO - Photo uploaded: ID=45, User=2, File=20260121_195007_subject02.centerlight.jpg
+2026-01-21 19:50:07,590 - INFO - Photo uploaded: ID=46, User=2, File=20260121_195007_subject02.glasses.jpg
+2026-01-21 19:50:07,621 - INFO - Photo uploaded: ID=47, User=2, File=20260121_195007_subject02.happy.jpg
+2026-01-21 19:50:07,645 - INFO - Photo uploaded: ID=48, User=2, File=20260121_195007_subject02.leftlight.jpg
+2026-01-21 19:50:07,669 - INFO - Photo uploaded: ID=49, User=2, File=20260121_195007_subject02.noglasses.jpg
+2026-01-21 19:50:07,695 - INFO - Photo uploaded: ID=50, User=2, File=20260121_195007_subject02.normal.jpg
+2026-01-21 19:50:07,726 - INFO - Photo uploaded: ID=51, User=2, File=20260121_195007_subject02.rightlight.jpg
+2026-01-21 19:50:07,751 - INFO - Photo uploaded: ID=52, User=2, File=20260121_195007_subject02.sad.jpg
+2026-01-21 19:50:07,781 - INFO - Photo uploaded: ID=53, User=2, File=20260121_195007_subject02.sleepy.jpg
+2026-01-21 19:50:07,807 - INFO - Photo uploaded: ID=54, User=2, File=20260121_195007_subject02.surprised.jpg
+2026-01-21 19:50:07,835 - INFO - Photo uploaded: ID=55, User=2, File=20260121_195007_subject02.wink.jpg
+2026-01-21 19:50:07,836 - INFO - Multiple photos uploaded: User=2, Success=11, Failed=0
+2026-01-21 19:50:22,884 - INFO - Photo uploaded: ID=56, User=1, File=20260121_195022_subject01.centerlight.jpg
+2026-01-21 19:50:22,909 - INFO - Photo uploaded: ID=57, User=1, File=20260121_195022_subject01.glasses.jpg
+2026-01-21 19:50:22,933 - INFO - Photo uploaded: ID=58, User=1, File=20260121_195022_subject01.happy.jpg
+2026-01-21 19:50:22,963 - INFO - Photo uploaded: ID=59, User=1, File=20260121_195022_subject01.leftlight.jpg
+2026-01-21 19:50:22,993 - INFO - Photo uploaded: ID=60, User=1, File=20260121_195022_subject01.noglasses.jpg
+2026-01-21 19:50:23,018 - INFO - Photo uploaded: ID=61, User=1, File=20260121_195022_subject01.normal.jpg
+2026-01-21 19:50:23,043 - INFO - Photo uploaded: ID=62, User=1, File=20260121_195023_subject01.rightlight.jpg
+2026-01-21 19:50:23,067 - INFO - Photo uploaded: ID=63, User=1, File=20260121_195023_subject01.sad.jpg
+2026-01-21 19:50:23,091 - INFO - Photo uploaded: ID=64, User=1, File=20260121_195023_subject01.sleepy.jpg
+2026-01-21 19:50:23,115 - INFO - Photo uploaded: ID=65, User=1, File=20260121_195023_subject01.surprised.jpg
+2026-01-21 19:50:23,146 - INFO - Photo uploaded: ID=66, User=1, File=20260121_195023_subject01.wink.jpg
+2026-01-21 19:50:23,146 - INFO - Multiple photos uploaded: User=1, Success=11, Failed=0

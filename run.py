@@ -8,6 +8,22 @@ from app.api.prediction import api as prediction_ns
 from app.api.auth import api as auth_ns
 from app.utils.db import init_db
 import os
+import warnings
+import logging
+
+# Suppress all warnings untuk Raspberry Pi (cleaner output)
+warnings.filterwarnings('ignore')
+
+# Suppress ONNX Runtime warnings
+os.environ['ORT_LOGGING_LEVEL'] = '3'
+
+# Suppress TensorFlow/ONNX verbose logging
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ['GLOG_minloglevel'] = '3'
+
+# Set logging untuk library external
+logging.getLogger('onnxruntime').setLevel(logging.ERROR)
+logging.getLogger('insightface').setLevel(logging.ERROR)
 
 def create_app():
     app = Flask(__name__)

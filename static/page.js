@@ -1085,12 +1085,13 @@ function displayTrainingResults(stats) {
     `;
     
     // Add detailed metrics table
-    if (stats.class_labels && stats.class_labels.length > 0) {
+    const classLabels = stats.class_labels || stats.users || [];
+    if (classLabels && classLabels.length > 0) {
         resultsContainer.innerHTML += `
             <div style="grid-column: 1 / -1;">
                 <h3 style="margin: 20px 0 10px 0;">📊 Recognized Users</h3>
                 <p style="color: #6b7280; margin-bottom: 15px;">
-                    Model trained to recognize: ${stats.class_labels.join(', ')}
+                    Model trained to recognize: ${classLabels.join(', ')}
                 </p>
             </div>
         `;
@@ -1217,23 +1218,26 @@ async function checkPredictionModelStatus() {
         
         if (result.status === 'success' && result.data.loaded) {
             const info = result.data;
+            const users = info.users || info.classes || [];
+            const numUsers = info.num_users || info.num_classes || 0;
+            
             statusContainer.innerHTML = `
                 <div class="status-grid">
                     <div class="status-item status-success">
                         <div class="label">Status</div>
-                        <div class="value">✅ Model Ready</div>
+                        <div class="value">✅ Database Ready</div>
                     </div>
                     <div class="status-item">
-                        <div class="label">Number of Classes</div>
-                        <div class="value">${info.num_classes}</div>
+                        <div class="label">Number of Users</div>
+                        <div class="value">${numUsers}</div>
                     </div>
                     <div class="status-item">
-                        <div class="label">Test Accuracy</div>
-                        <div class="value">${(info.accuracy * 100).toFixed(2)}%</div>
+                        <div class="label">Total Faces</div>
+                        <div class="value">${info.total_faces || 0}</div>
                     </div>
                     <div class="status-item">
-                        <div class="label">Trained Users</div>
-                        <div class="value">${info.classes.join(', ')}</div>
+                        <div class="label">Registered Users</div>
+                        <div class="value">${users.length > 0 ? users.join(', ') : 'None'}</div>
                     </div>
                 </div>
             `;

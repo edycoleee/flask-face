@@ -11,3 +11,6 @@ keras
 numpy
 scikit-learn
 matplotlib
+insightface
+onnxruntime
+scikit-learn

@@ -9,7 +9,7 @@ env__/
 __pycache__/
 
 # Flask instance folder
-instance/
+# instance/
 
 # Editor/IDE-specific files
 .idea/  # For PyCharm, IntelliJ, etc.
@@ -39,4 +39,4 @@ Thumbs.db
 # Dataset and trained models (jangan upload ke GitHub)
 dataset/
 data/
-models/
+#models/

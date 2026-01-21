@@ -128,9 +128,9 @@ class TrainingStatus(Resource):
     @training_ns.doc('get_training_status')
     def get(self):
         """
-        Get information about the trained model
+        Get information about the trained model (Face Embedding Database)
         
-        Returns model statistics if available
+        Returns database statistics if available
         """
         try:
             import json
@@ -145,30 +145,35 @@ class TrainingStatus(Resource):
                     'model_available': False
                 }, 200
             
-            accuracy_file = models_dir / 'accuracy.json'
-            label_map_file = models_dir / 'label_map.json'
+            # Check for embedding database files (NEW system)
+            db_file = models_dir / 'face_db.npy'
+            meta_file = models_dir / 'face_db.json'
             
-            if not accuracy_file.exists():
+            if not db_file.exists() or not meta_file.exists():
                 return {
                     'success': False,
-                    'message': 'Model training not completed',
+                    'message': 'Face database not found. Please build database first.',
                     'model_available': False
                 }, 200
             
-            # Load stats
-            with open(accuracy_file, 'r') as f:
-                accuracy_data = json.load(f)
-            
-            with open(label_map_file, 'r') as f:
-                label_map = json.load(f)
+            # Load metadata
+            with open(meta_file, 'r') as f:
+                meta_data = json.load(f)
             
             return {
                 'success': True,
-                'message': 'Model information retrieved',
+                'message': 'Face database information retrieved',
                 'model_available': True,
-                'accuracy_metrics': accuracy_data,
-                'num_classes': len(label_map),
-                'class_labels': list(label_map.values())
+                'accuracy_metrics': {
+                    'model': meta_data.get('model', 'InsightFace'),
+                    'embedding_dim': meta_data.get('embedding_dim', 512),
+                    'timestamp': meta_data.get('timestamp', 'N/A')
+                },
+                'num_classes': len(meta_data.get('users', [])),
+                'class_labels': meta_data.get('users', []),
+                'total_faces': meta_data.get('total_faces', 0),
+                'total_images': meta_data.get('total_images', 0),
+                'samples_per_user': meta_data.get('samples_per_user', {})
             }, 200
             
         except Exception as e:
