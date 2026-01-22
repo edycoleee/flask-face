@@ -1,51 +1,83 @@
 #//app/utils/db.py
-import sqlite3
+import psycopg2
+import psycopg2.extras
 import os
+from contextlib import contextmanager
 
-DB_PATH = os.path.join("instance", "app.db")
+# PostgreSQL connection configuration
+DB_CONFIG = {
+    'dbname': os.getenv('POSTGRES_DB', 'face_db'),
+    'user': os.getenv('POSTGRES_USER', 'sultan'),
+    'password': os.getenv('POSTGRES_PASSWORD', 'Sulfat123#!'),
+    'host': os.getenv('POSTGRES_HOST', '192.168.171.184'),
+    'port': os.getenv('POSTGRES_PORT', '5432')
+}
 
+@contextmanager
 def get_db_connection():
-    # check_same_thread=False diperlukan agar SQLite bisa diakses Flask
-    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
-    conn.row_factory = sqlite3.Row  # Hasil query jadi objek mirip dict
-    return conn
+    """
+    Context manager untuk PostgreSQL connection.
+    Menggunakan psycopg2 dengan RealDictCursor untuk hasil query seperti dict.
+    
+    Usage:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM users")
+            results = cursor.fetchall()
+    """
+    conn = psycopg2.connect(**DB_CONFIG)
+    try:
+        yield conn
+    finally:
+        conn.close()
+
+def get_db_cursor(conn):
+    """
+    Get cursor dengan RealDictCursor untuk hasil query sebagai dict.
+    Mirip dengan sqlite3.Row behavior.
+    """
+    return conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
 def init_db():
-    if not os.path.exists("instance"):
-        os.makedirs("instance")
-        
-    conn = get_db_connection()
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            email TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL
-        )
-    ''')
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS photos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            filename TEXT NOT NULL,
-            filepath TEXT NOT NULL,
-            width INTEGER DEFAULT 224,
-            height INTEGER DEFAULT 224,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-        )
-    ''')
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS auth_tokens (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            token TEXT UNIQUE NOT NULL,
-            confidence REAL NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            expires_at TIMESTAMP,
-            is_active INTEGER DEFAULT 1,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-        )
-    ''')
-    conn.commit()
-    conn.close()
+    """
+    Initialize database tables.
+    Catatan: Jika menggunakan docker-compose dengan init.sql,
+    function ini tidak diperlukan karena tables sudah auto-created.
+    
+    Function ini hanya sebagai fallback jika manual setup.
+    """
+    try:
+        with get_db_connection() as conn:
+            cursor = get_db_cursor(conn)
+            
+            # Test connection
+            cursor.execute("SELECT version();")
+            version = cursor.fetchone()
+            print(f"✓ PostgreSQL connected: {version['version']}")
+            
+            # Verify pgvector extension
+            cursor.execute("SELECT * FROM pg_extension WHERE extname = 'vector';")
+            if cursor.fetchone():
+                print("✓ pgvector extension is installed")
+            else:
+                print("⚠ Warning: pgvector extension not found. Run init.sql first!")
+            
+            # Verify tables
+            cursor.execute("""
+                SELECT table_name FROM information_schema.tables 
+                WHERE table_schema = 'public' 
+                ORDER BY table_name;
+            """)
+            tables = cursor.fetchall()
+            if tables:
+                print(f"✓ Found {len(tables)} tables:")
+                for table in tables:
+                    print(f"  - {table['table_name']}")
+            else:
+                print("⚠ Warning: No tables found. Run init.sql first!")
+            
+            conn.commit()
+            
+    except Exception as e:
+        print(f"✗ Database initialization error: {str(e)}")
+        raise

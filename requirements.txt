@@ -12,6 +12,8 @@ requests>=2.32.0
 
 # Database
 # SQLAlchemy is included via flask-sqlalchemy
+psycopg2-binary>=2.9.9  # PostgreSQL adapter
+pgvector>=0.2.4  # PostgreSQL vector extension support
 
 # Face Recognition (InsightFace - Primary)
 insightface>=0.7.3

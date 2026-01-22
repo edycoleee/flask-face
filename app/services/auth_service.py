@@ -4,7 +4,7 @@ import logging
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from app.utils.db import get_db_connection
+from app.utils.db import get_db_connection, get_db_cursor
 from app.services.prediction_service import prediction_service
 
 logger = logging.getLogger(__name__)
@@ -77,16 +77,14 @@ class AuthService:
             expires_at = created_at + timedelta(hours=self.token_expiry_hours)
             
             # Save token to database
-            conn = get_db_connection()
-            try:
-                conn.execute('''
+            with get_db_connection() as conn:
+                cursor = get_db_cursor(conn)
+                cursor.execute('''
                     INSERT INTO auth_tokens (user_id, token, confidence, expires_at)
-                    VALUES (?, ?, ?, ?)
+                    VALUES (%s, %s, %s, %s)
                 ''', (user_id, token, confidence, expires_at.isoformat()))
                 conn.commit()
                 logger.info("✓ Token saved to database")
-            finally:
-                conn.close()
             
             logger.info("=" * 50)
             logger.info("✅ LOGIN SUCCESSFUL")
@@ -121,17 +119,17 @@ class AuthService:
             dict: User info jika valid, None jika invalid
         """
         try:
-            conn = get_db_connection()
-            
-            # Get token info
-            result = conn.execute('''
-                SELECT t.*, u.name, u.email
-                FROM auth_tokens t
-                JOIN users u ON t.user_id = u.id
-                WHERE t.token = ? AND t.is_active = 1
-            ''', (token,)).fetchone()
-            
-            conn.close()
+            with get_db_connection() as conn:
+                cursor = get_db_cursor(conn)
+                
+                # Get token info
+                cursor.execute('''
+                    SELECT t.*, u.name, u.email
+                    FROM auth_tokens t
+                    JOIN users u ON t.user_id = u.id
+                    WHERE t.token = %s AND t.is_active = TRUE
+                ''', (token,))
+                result = cursor.fetchone()
             
             if not result:
                 logger.warning(f"Token not found or inactive: {token}")
@@ -163,14 +161,14 @@ class AuthService:
     def deactivate_token(self, token):
         """Deactivate token (logout)"""
         try:
-            conn = get_db_connection()
-            conn.execute('''
-                UPDATE auth_tokens
-                SET is_active = 0
-                WHERE token = ?
-            ''', (token,))
-            conn.commit()
-            conn.close()
+            with get_db_connection() as conn:
+                cursor = get_db_cursor(conn)
+                cursor.execute('''
+                    UPDATE auth_tokens
+                    SET is_active = FALSE
+                    WHERE token = %s
+                ''', (token,))
+                conn.commit()
             logger.info(f"Token deactivated: {token}")
             return True
         except Exception as e:
@@ -180,14 +178,15 @@ class AuthService:
     def get_user_active_tokens(self, user_id):
         """Get all active tokens untuk user"""
         try:
-            conn = get_db_connection()
-            results = conn.execute('''
-                SELECT token, confidence, created_at, expires_at
-                FROM auth_tokens
-                WHERE user_id = ? AND is_active = 1
-                ORDER BY created_at DESC
-            ''', (user_id,)).fetchall()
-            conn.close()
+            with get_db_connection() as conn:
+                cursor = get_db_cursor(conn)
+                cursor.execute('''
+                    SELECT token, confidence, created_at, expires_at
+                    FROM auth_tokens
+                    WHERE user_id = %s AND is_active = TRUE
+                    ORDER BY created_at DESC
+                ''', (user_id,))
+                results = cursor.fetchall()
             
             tokens = []
             for row in results:
@@ -209,16 +208,16 @@ class AuthService:
     def cleanup_expired_tokens(self):
         """Cleanup all expired tokens"""
         try:
-            conn = get_db_connection()
-            now = datetime.now().isoformat()
-            result = conn.execute('''
-                UPDATE auth_tokens
-                SET is_active = 0
-                WHERE expires_at < ? AND is_active = 1
-            ''', (now,))
-            count = result.rowcount
-            conn.commit()
-            conn.close()
+            with get_db_connection() as conn:
+                cursor = get_db_cursor(conn)
+                now = datetime.now().isoformat()
+                cursor.execute('''
+                    UPDATE auth_tokens
+                    SET is_active = FALSE
+                    WHERE expires_at < %s AND is_active = TRUE
+                ''', (now,))
+                count = cursor.rowcount
+                conn.commit()
             
             logger.info(f"Cleaned up {count} expired tokens")
             return count
@@ -231,6 +230,8 @@ class AuthService:
         """
         Verify face untuk specific user (1:1 verification)
         Lebih cepat dan akurat daripada face recognition (1:N)
+        
+        Menggunakan PostgreSQL pgvector untuk similarity search
         
         Args:
             user_id: ID user yang ingin diverifikasi
@@ -248,17 +249,18 @@ class AuthService:
         """
         try:
             logger.info("=" * 50)
-            logger.info("FACE VERIFICATION (1:1)")
+            logger.info("FACE VERIFICATION (1:1) - OPTIMIZED WITH PGVECTOR")
             logger.info("=" * 50)
             logger.info(f"User ID: {user_id}")
             
             # Get user info dari database
-            conn = get_db_connection()
-            user = conn.execute(
-                "SELECT id, name, email FROM users WHERE id = ?",
-                (user_id,)
-            ).fetchone()
-            conn.close()
+            with get_db_connection() as conn:
+                cursor = get_db_cursor(conn)
+                cursor.execute(
+                    "SELECT id, name, email FROM users WHERE id = %s",
+                    (user_id,)
+                )
+                user = cursor.fetchone()
             
             if not user:
                 logger.warning(f"User not found: {user_id}")
@@ -271,37 +273,33 @@ class AuthService:
             user_data = dict(user)
             logger.info(f"Verifying face for: {user_data['name']} (ID: {user_id})")
             
-            # Run face prediction
+            # Verify face menggunakan pgvector (1:1 comparison)
             logger.info(f"Processing image: {image_path}")
-            prediction_result = prediction_service.predict(image_path)
+            verification_result = prediction_service.verify_face_with_user(
+                image_path, 
+                user_id,
+                similarity_threshold=self.confidence_threshold / 100.0  # Convert % to 0-1
+            )
             
-            predicted_user_id = prediction_result['user_id']
-            confidence = prediction_result['confidence']
+            match = verification_result['match']
+            confidence = verification_result['confidence']
+            similarity = verification_result['similarity']
             
-            logger.info(f"Predicted User ID: {predicted_user_id}")
-            logger.info(f"Confidence: {confidence}%")
-            logger.info(f"Threshold: {self.confidence_threshold}%")
+            logger.info(f"Verification complete:")
+            logger.info(f"  Match: {match}")
+            logger.info(f"  Similarity: {similarity:.4f}")
+            logger.info(f"  Confidence: {confidence:.2f}%")
+            logger.info(f"  Threshold: {self.confidence_threshold}%")
             
-            # Check if predicted user matches claimed user
-            if predicted_user_id != user_id:
-                logger.warning(f"❌ Face does not match! Predicted: {predicted_user_id}, Claimed: {user_id}")
+            # Check if match
+            if not match:
+                logger.warning(f"❌ Face does not match user {user_id}")
                 return {
                     'success': False,
-                    'message': f'Face does not match user {user_id}',
+                    'message': f'Face verification failed. Confidence: {confidence}%',
                     'match': False,
-                    'predicted_user_id': predicted_user_id,
-                    'claimed_user_id': user_id,
-                    'confidence': confidence
-                }
-            
-            # Check confidence threshold
-            if confidence < self.confidence_threshold:
-                logger.warning(f"❌ Confidence too low: {confidence}% < {self.confidence_threshold}%")
-                return {
-                    'success': False,
-                    'message': f'Confidence too low: {confidence}%. Required: {self.confidence_threshold}%',
-                    'match': True,  # Face matches but low confidence
                     'confidence': confidence,
+                    'similarity': similarity,
                     'required_confidence': self.confidence_threshold
                 }
             
@@ -314,22 +312,22 @@ class AuthService:
             expires_at = created_at + timedelta(hours=self.token_expiry_hours)
             
             # Save token
-            conn = get_db_connection()
-            try:
-                conn.execute('''
+            with get_db_connection() as conn:
+                cursor = get_db_cursor(conn)
+                cursor.execute('''
                     INSERT INTO auth_tokens (user_id, token, confidence, expires_at)
-                    VALUES (?, ?, ?, ?)
+                    VALUES (%s, %s, %s, %s)
                 ''', (user_id, token, confidence, expires_at.isoformat()))
                 conn.commit()
                 logger.info("✓ Token saved to database")
-            finally:
-                conn.close()
             
             logger.info("=" * 50)
             logger.info("✅ VERIFICATION SUCCESSFUL")
             logger.info(f"User: {user_data['name']} (ID: {user_id})")
+            logger.info(f"Confidence: {confidence:.2f}% (Similarity: {similarity:.4f})")
             logger.info(f"Token: {token}")
             logger.info(f"Expires: {expires_at.isoformat()}")
+            logger.info(f"Method: PostgreSQL pgvector (1:1) - FAST!")
             logger.info("=" * 50)
             
             return {
@@ -340,8 +338,10 @@ class AuthService:
                 'email': user_data['email'],
                 'token': token,
                 'confidence': confidence,
+                'similarity': similarity,
                 'created_at': created_at.isoformat(),
-                'expires_at': expires_at.isoformat()
+                'expires_at': expires_at.isoformat(),
+                'method': 'PostgreSQL pgvector (1:1)'
             }
             
         except Exception as e:
@@ -373,12 +373,13 @@ class AuthService:
             logger.info(f"Email: {email}")
             
             # Get user from database
-            conn = get_db_connection()
-            user = conn.execute(
-                "SELECT id, name, email, password FROM users WHERE email = ?",
-                (email,)
-            ).fetchone()
-            conn.close()
+            with get_db_connection() as conn:
+                cursor = get_db_cursor(conn)
+                cursor.execute(
+                    "SELECT id, name, email, password FROM users WHERE email = %s",
+                    (email,)
+                )
+                user = cursor.fetchone()
             
             if not user:
                 logger.warning(f"❌ User not found: {email}")
@@ -408,16 +409,14 @@ class AuthService:
             expires_at = created_at + timedelta(hours=self.token_expiry_hours)
             
             # Save token to database (confidence = 100.0 for password login)
-            conn = get_db_connection()
-            try:
-                conn.execute('''
+            with get_db_connection() as conn:
+                cursor = get_db_cursor(conn)
+                cursor.execute('''
                     INSERT INTO auth_tokens (user_id, token, confidence, expires_at)
-                    VALUES (?, ?, ?, ?)
+                    VALUES (%s, %s, %s, %s)
                 ''', (user_data['id'], token, 100.0, expires_at.isoformat()))
                 conn.commit()
                 logger.info("✓ Token saved to database")
-            finally:
-                conn.close()
             
             logger.info("=" * 50)
             logger.info("✅ LOGIN SUCCESSFUL")

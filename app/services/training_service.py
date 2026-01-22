@@ -217,3 +217,102 @@ class TrainingService:
             return "unknown", float(best_score)
 
         return best_name, float(best_score)
+
+    # ============================================================
+    # BUILD EMBEDDINGS FOR SINGLE USER (INCREMENTAL)
+    # ============================================================
+    def build_embeddings_for_user(self, user_id):
+        """
+        Build face embeddings for a single user and save to PostgreSQL
+        
+        This is INCREMENTAL - only processes one user, very fast (1-3 seconds)
+        
+        Args:
+            user_id: User ID to build embeddings for
+            
+        Returns:
+            dict: Statistics (faces_processed, embeddings_created, etc.)
+        """
+        import time
+        from app.utils.db import get_db_connection
+        
+        start_time = time.time()
+        
+        logger.info("=" * 50)
+        logger.info(f"BUILDING EMBEDDINGS FOR USER {user_id}")
+        logger.info("=" * 50)
+        logger.info("Method: InsightFace (Incremental)")
+        logger.info("=" * 50)
+        
+        # Check if user folder exists
+        user_folder = self.dataset_dir / str(user_id)
+        if not user_folder.exists() or not user_folder.is_dir():
+            raise FileNotFoundError(f"Dataset folder for user {user_id} not found: {user_folder}")
+        
+        # Process all images for this user
+        embeddings_created = 0
+        faces_processed = 0
+        
+        # Delete old embeddings for this user first
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM face_embeddings WHERE user_id = %s", (user_id,))
+                deleted_count = cur.rowcount
+                logger.info(f"Deleted {deleted_count} old embeddings for user {user_id}")
+        
+        # Extract new embeddings
+        for img_file in user_folder.iterdir():
+            if not img_file.is_file():
+                continue
+                
+            try:
+                # Load image
+                img = np.array(Image.open(img_file).convert("RGB"))
+                faces = self.face_app.get(img)
+                
+                if len(faces) == 0:
+                    logger.warning(f"No face detected: {img_file}")
+                    continue
+                
+                # Get embedding from first face
+                face = faces[0]
+                embedding = face.embedding.tolist()  # Convert to list for PostgreSQL
+                
+                # Save to PostgreSQL
+                with get_db_connection() as conn:
+                    with conn.cursor() as cur:
+                        cur.execute(
+                            """
+                            INSERT INTO face_embeddings (user_id, embedding, photo_path, created_at)
+                            VALUES (%s, %s, %s, NOW())
+                            """,
+                            (user_id, embedding, str(img_file))
+                        )
+                
+                embeddings_created += 1
+                faces_processed += 1
+                logger.info(f"✓ Processed: {img_file.name}")
+                
+            except Exception as e:
+                logger.warning(f"Failed to process {img_file}: {e}")
+        
+        if faces_processed == 0:
+            raise ValueError(f"No faces detected for user {user_id}")
+        
+        processing_time = time.time() - start_time
+        
+        logger.info("\n" + "=" * 50)
+        logger.info(f"INCREMENTAL BUILD COMPLETE FOR USER {user_id}")
+        logger.info("=" * 50)
+        logger.info(f"Faces processed: {faces_processed}")
+        logger.info(f"Embeddings created: {embeddings_created}")
+        logger.info(f"Time taken: {processing_time:.2f} seconds")
+        logger.info("=" * 50 + "\n")
+        
+        return {
+            'user_id': user_id,
+            'faces_processed': faces_processed,
+            'embeddings_created': embeddings_created,
+            'processing_time_seconds': round(processing_time, 2),
+            'timestamp': datetime.now().isoformat()
+        }

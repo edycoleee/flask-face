@@ -16,6 +16,10 @@ training_request_model = training_ns.model('TrainingRequest', {
     'continue_training': fields.Boolean(description='[IGNORED] Always full rebuild (for backward compatibility)', required=False),
 })
 
+incremental_training_model = training_ns.model('IncrementalTrainingRequest', {
+    'user_id': fields.Integer(description='User ID to build embeddings for', required=True),
+})
+
 # Response models
 training_response_model = training_ns.model('TrainingResponse', {
     'success': fields.Boolean(required=True, description='Training success status'),
@@ -127,6 +131,94 @@ class TrainingStart(Resource):
             return {
                 'success': False,
                 'message': 'Training failed',
+                'error': str(e)
+            }, 500
+
+
+@training_ns.route('/incremental')
+class TrainingIncremental(Resource):
+    """Build embeddings for single user (incremental)"""
+    
+    @training_ns.doc('incremental_training')
+    @training_ns.expect(incremental_training_model)
+    @training_ns.response(200, 'User embeddings built successfully', training_response_model)
+    @training_ns.response(400, 'Bad request', error_response_model)
+    @training_ns.response(404, 'User not found', error_response_model)
+    @training_ns.response(500, 'Server error', error_response_model)
+    def post(self):
+        """
+        Build Face Embeddings for Single User (INCREMENTAL)
+        
+        **Use this when:**
+        - ✅ Adding a new user
+        - ✅ User uploaded new photos
+        - ✅ Want fast incremental update (1-3 seconds)
+        
+        **How it works:**
+        1. Scan photos for specific user_id in `dataset/{user_id}/`
+        2. Extract embeddings for that user only
+        3. Update PostgreSQL face_embeddings table
+        4. Other users remain unchanged
+        
+        **Performance:**
+        - Full rebuild: 10-30 seconds (all users)
+        - Incremental: 1-3 seconds (one user)
+        
+        **Parameters:**
+        - `user_id` (required): User ID to build embeddings for
+        
+        **Returns:**
+        - faces_processed: Number of photos processed
+        - embeddings_created: Number of embeddings saved
+        - user_id: User ID processed
+        - processing_time_seconds: Time taken
+        """
+        try:
+            data = request.get_json()
+            
+            if not data or 'user_id' not in data:
+                return {
+                    'success': False,
+                    'message': 'user_id is required',
+                }, 400
+            
+            user_id = data['user_id']
+            
+            logger.info(f"Incremental training request for user_id: {user_id}")
+            
+            # Initialize service
+            service = TrainingService()
+            
+            # Build embeddings for single user
+            stats = service.build_embeddings_for_user(user_id)
+            
+            return {
+                'success': True,
+                'message': f'Embeddings built for user {user_id}',
+                'data': stats
+            }, 200
+            
+        except FileNotFoundError as e:
+            logger.error(f"User dataset not found: {str(e)}")
+            return {
+                'success': False,
+                'message': f'Dataset for user not found',
+                'error': str(e)
+            }, 404
+            
+        except ValueError as e:
+            logger.error(f"Invalid data: {str(e)}")
+            return {
+                'success': False,
+                'message': 'Invalid data',
+                'error': str(e)
+            }, 400
+            
+        except Exception as e:
+            logger.error(f"Incremental training failed: {str(e)}", exc_info=True)
+            return {
+                'success': False,
+                'message': 'Incremental training failed',
                 'error': str(e)
             }, 500
 

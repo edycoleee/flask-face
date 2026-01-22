@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Documentation
+*.md
+MISC/
+
+# Logs & Data
+logs/
+*.log
+
+# Models (large files - mount as volume instead)
+models/*.npy
+models/*.json
+
+# Instance data
+instance/
+
+# Temporary files
+*.tmp
+*.bak
+.DS_Store

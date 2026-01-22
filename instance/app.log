@@ -460,3 +460,6 @@
 2026-01-21 19:50:23,115 - INFO - Photo uploaded: ID=65, User=1, File=20260121_195023_subject01.surprised.jpg
 2026-01-21 19:50:23,146 - INFO - Photo uploaded: ID=66, User=1, File=20260121_195023_subject01.wink.jpg
 2026-01-21 19:50:23,146 - INFO - Multiple photos uploaded: User=1, Success=11, Failed=0
+2026-01-22 13:13:32,380 - INFO - User created: 1 - folder created at dataset/1
+2026-01-22 13:14:08,326 - INFO - User created: 2 - folder created at dataset/2
+2026-01-22 13:14:27,049 - INFO - User created: 3 - folder created at dataset/3

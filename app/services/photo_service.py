@@ -1,9 +1,8 @@
 import os
-import sqlite3
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from PIL import Image
-from app.utils.db import get_db_connection
+from app.utils.db import get_db_connection, get_db_cursor
 from app.utils.logger import logger
 
 DATASET_DIR = "dataset"
@@ -76,18 +75,18 @@ class PhotoService:
                 return None, "Gagal mengubah ukuran gambar"
             
             # Save metadata to database
-            conn = get_db_connection()
-            cursor = conn.cursor()
-            created_at = datetime.now().isoformat()
-            
-            cursor.execute('''
-                INSERT INTO photos (user_id, filename, filepath, width, height, created_at)
-                VALUES (?, ?, ?, ?, ?, ?)
-            ''', (user_id, filename, filepath, width, height, created_at))
-            
-            photo_id = cursor.lastrowid
-            conn.commit()
-            conn.close()
+            with get_db_connection() as conn:
+                cursor = get_db_cursor(conn)
+                created_at = datetime.now().isoformat()
+                
+                cursor.execute('''
+                    INSERT INTO photos (user_id, filename, filepath, width, height, created_at)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    RETURNING id
+                ''', (user_id, filename, filepath, width, height, created_at))
+                
+                photo_id = cursor.fetchone()['id']
+                conn.commit()
             
             logger.info(f"Photo uploaded: ID={photo_id}, User={user_id}, File={filename}")
             
@@ -138,13 +137,14 @@ class PhotoService:
     def get_user_photos(user_id):
         """Get all photos for a user"""
         try:
-            conn = get_db_connection()
-            rows = conn.execute(
-                "SELECT * FROM photos WHERE user_id = ? ORDER BY created_at DESC",
-                (user_id,)
-            ).fetchall()
-            conn.close()
-            return [dict(row) for row in rows]
+            with get_db_connection() as conn:
+                cursor = get_db_cursor(conn)
+                cursor.execute(
+                    "SELECT * FROM photos WHERE user_id = %s ORDER BY created_at DESC",
+                    (user_id,)
+                )
+                rows = cursor.fetchall()
+                return rows
         except Exception as e:
             logger.error(f"Error getting user photos: {str(e)}")
             return None
@@ -153,23 +153,22 @@ class PhotoService:
     def delete_photo(photo_id, user_id):
         """Delete a photo by ID"""
         try:
-            conn = get_db_connection()
-            cursor = conn.cursor()
-            
-            # Get photo info first
-            photo = cursor.execute(
-                "SELECT * FROM photos WHERE id = ? AND user_id = ?",
-                (photo_id, user_id)
-            ).fetchone()
-            
-            if not photo:
-                conn.close()
-                return False, "Foto tidak ditemukan"
-            
-            # Delete from database
-            cursor.execute("DELETE FROM photos WHERE id = ?", (photo_id,))
-            conn.commit()
-            conn.close()
+            with get_db_connection() as conn:
+                cursor = get_db_cursor(conn)
+                
+                # Get photo info first
+                cursor.execute(
+                    "SELECT * FROM photos WHERE id = %s AND user_id = %s",
+                    (photo_id, user_id)
+                )
+                photo = cursor.fetchone()
+                
+                if not photo:
+                    return False, "Foto tidak ditemukan"
+                
+                # Delete from database
+                cursor.execute("DELETE FROM photos WHERE id = %s", (photo_id,))
+                conn.commit()
             
             # Delete file
             filepath = dict(photo)["filepath"]

@@ -12,7 +12,7 @@ warnings.filterwarnings('ignore')
 from insightface.app import FaceAnalysis
 from sklearn.metrics.pairwise import cosine_similarity
 
-from app.utils.db import get_db_connection
+from app.utils.db import get_db_connection, get_db_cursor
 
 logger = logging.getLogger(__name__)
 
@@ -190,6 +190,127 @@ class PredictionService:
             
         except Exception as e:
             logger.error(f"Prediction failed: {str(e)}", exc_info=True)
+            raise
+    
+    def extract_embedding(self, image_path):
+        """
+        Extract face embedding dari image (tanpa prediksi)
+        Digunakan untuk face verification (1:1) yang lebih cepat
+        
+        Args:
+            image_path: Path ke image file
+            
+        Returns:
+            numpy.ndarray: Face embedding (512-D vector)
+        """
+        # Load model jika belum
+        if not self.is_loaded:
+            self.load_model()
+        
+        try:
+            # Load and process image
+            logger.info(f"Extracting embedding from: {image_path}")
+            img = np.array(Image.open(image_path).convert("RGB"))
+            
+            # Detect face and extract embedding
+            faces = self.face_app.get(img)
+            
+            if len(faces) == 0:
+                raise ValueError("No face detected in image")
+            
+            if len(faces) > 1:
+                logger.warning(f"Multiple faces detected ({len(faces)}), using the first one")
+            
+            # Get embedding dari wajah pertama
+            embedding = faces[0].embedding
+            logger.info(f"✓ Embedding extracted (dim: {embedding.shape[0]})")
+            
+            return embedding
+            
+        except Exception as e:
+            logger.error(f"Failed to extract embedding: {str(e)}", exc_info=True)
+            raise
+    
+    def verify_face_with_user(self, image_path, user_id, similarity_threshold=0.7):
+        """
+        Verify face dengan specific user menggunakan PostgreSQL pgvector (1:1)
+        LEBIH CEPAT daripada predict() karena hanya compare dengan 1 user
+        
+        Args:
+            image_path: Path ke image file
+            user_id: ID user yang ingin diverifikasi
+            similarity_threshold: Minimum similarity (default: 0.7)
+            
+        Returns:
+            dict: {
+                'match': bool,
+                'user_id': int,
+                'name': str,
+                'email': str,
+                'confidence': float,
+                'similarity': float
+            }
+        """
+        try:
+            logger.info("=" * 50)
+            logger.info(f"FACE VERIFICATION (1:1) - User ID: {user_id}")
+            logger.info("=" * 50)
+            
+            # Extract embedding dari uploaded image
+            query_embedding = self.extract_embedding(image_path)
+            logger.info(f"Query embedding shape: {query_embedding.shape}")
+            
+            # Convert numpy array to list for PostgreSQL
+            embedding_list = query_embedding.tolist()
+            
+            # Call PostgreSQL function verify_face()
+            with get_db_connection() as conn:
+                cursor = get_db_cursor(conn)
+                
+                logger.info(f"Calling PostgreSQL verify_face() function...")
+                logger.info(f"User ID: {user_id}, Threshold: {similarity_threshold}")
+                
+                cursor.execute(
+                    "SELECT * FROM verify_face(%s::vector, %s, %s)",
+                    (embedding_list, user_id, similarity_threshold)
+                )
+                result = cursor.fetchone()
+            
+            if not result:
+                logger.warning(f"No result from verify_face() - user might not have embeddings")
+                return {
+                    'match': False,
+                    'user_id': user_id,
+                    'name': None,
+                    'email': None,
+                    'confidence': 0.0,
+                    'similarity': 0.0,
+                    'message': 'User has no face embeddings in database'
+                }
+            
+            match = result['match']
+            similarity = float(result['similarity'])
+            confidence = similarity * 100  # Convert to percentage
+            
+            logger.info(f"Verification result:")
+            logger.info(f"  Match: {match}")
+            logger.info(f"  Similarity: {similarity:.4f}")
+            logger.info(f"  Confidence: {confidence:.2f}%")
+            logger.info(f"  Threshold: {similarity_threshold}")
+            
+            return {
+                'match': match,
+                'user_id': user_id,
+                'name': result['user_name'],
+                'email': result['user_email'],
+                'confidence': round(confidence, 2),
+                'similarity': round(similarity, 4),
+                'threshold': similarity_threshold,
+                'method': 'PostgreSQL pgvector (1:1)'
+            }
+            
+        except Exception as e:
+            logger.error(f"Face verification failed: {str(e)}", exc_info=True)
             raise
     
     def get_model_info(self):

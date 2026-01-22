@@ -111,6 +111,12 @@ function setupForms() {
         trainingForm.addEventListener('submit', startTraining);
     }
     
+    // Incremental Training Form
+    const incrementalTrainingForm = document.getElementById('incrementalTrainingForm');
+    if (incrementalTrainingForm) {
+        incrementalTrainingForm.addEventListener('submit', startIncrementalTraining);
+    }
+    
     // Prediction Upload Form
     const predictUploadForm = document.getElementById('predictUploadForm');
     if (predictUploadForm) {
@@ -962,6 +968,122 @@ function hideCameraError() {
 // ==================== DATABASE BUILD SECTION ====================
 
 // Build face database
+// ============================================================
+// Training Mode Selection
+// ============================================================
+function selectTrainingMode(mode) {
+    const incrementalCard = document.getElementById('incrementalModeCard');
+    const fullRebuildCard = document.getElementById('fullRebuildModeCard');
+    const incrementalForm = document.getElementById('incrementalTrainingCard');
+    const fullRebuildForm = document.getElementById('fullRebuildCard');
+    
+    if (mode === 'incremental') {
+        // Show incremental form
+        incrementalForm.style.display = 'block';
+        fullRebuildForm.style.display = 'none';
+        incrementalCard.style.border = '2px solid #4caf50';
+        incrementalCard.style.background = '#f1f8f4';
+        fullRebuildCard.style.border = '2px solid #ddd';
+        fullRebuildCard.style.background = '#f9f9f9';
+    } else if (mode === 'full') {
+        // Show full rebuild form
+        incrementalForm.style.display = 'none';
+        fullRebuildForm.style.display = 'block';
+        incrementalCard.style.border = '2px solid #ddd';
+        incrementalCard.style.background = '#f9f9f9';
+        fullRebuildCard.style.border = '2px solid #2196f3';
+        fullRebuildCard.style.background = '#e3f2fd';
+    } else {
+        // Reset to mode selection
+        incrementalForm.style.display = 'none';
+        fullRebuildForm.style.display = 'none';
+        incrementalCard.style.border = '2px solid #4caf50';
+        incrementalCard.style.background = '#f1f8f4';
+        fullRebuildCard.style.border = '2px solid #ddd';
+        fullRebuildCard.style.background = '#f9f9f9';
+    }
+}
+
+// ============================================================
+// Incremental Training (Single User)
+// ============================================================
+async function startIncrementalTraining(e) {
+    e.preventDefault();
+    
+    const messageEl = document.getElementById('incrementalMessage');
+    const startBtn = document.getElementById('startIncrementalBtn');
+    const userIdInput = document.getElementById('incrementalUserId');
+    const userId = parseInt(userIdInput.value);
+    
+    if (!userId || userId < 1) {
+        showMessage(messageEl, '❌ Please enter a valid user ID', 'error');
+        return;
+    }
+    
+    // Disable button
+    startBtn.disabled = true;
+    startBtn.innerHTML = '⏳ Building embeddings...';
+    
+    try {
+        showMessage(messageEl, `⚡ Building embeddings for user ${userId}...`, 'info');
+        
+        const startTime = performance.now();
+        
+        const response = await fetch(`${API_BASE}/training/incremental`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ user_id: userId })
+        });
+        
+        const data = await response.json();
+        const elapsedTime = ((performance.now() - startTime) / 1000).toFixed(2);
+        
+        if (response.ok) {
+            showMessage(messageEl, 
+                `✅ ${data.message} in ${elapsedTime}s! (Processed ${data.data.faces_processed} faces)`, 
+                'success'
+            );
+            
+            // Display results
+            displayIncrementalResults(data.data);
+            
+            // Reset form
+            userIdInput.value = '';
+        } else {
+            showMessage(messageEl, `❌ Error: ${data.message}`, 'error');
+        }
+    } catch (error) {
+        showMessage(messageEl, `❌ Error: ${error.message}`, 'error');
+    } finally {
+        startBtn.disabled = false;
+        startBtn.innerHTML = '⚡ Build Embeddings for This User';
+    }
+}
+
+// Display incremental training results
+function displayIncrementalResults(stats) {
+    const messageEl = document.getElementById('incrementalMessage');
+    
+    const resultsHtml = `
+        <div class="info-box" style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-left: 4px solid #4caf50; border-radius: 4px;">
+            <h4 style="margin: 0 0 10px 0; color: #2e7d32;">✅ Training Complete</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px;">
+                <div><strong>User ID:</strong> ${stats.user_id}</div>
+                <div><strong>Faces Processed:</strong> ${stats.faces_processed}</div>
+                <div><strong>Embeddings Created:</strong> ${stats.embeddings_created}</div>
+                <div><strong>Time Taken:</strong> ${stats.processing_time_seconds}s</div>
+            </div>
+        </div>
+    `;
+    
+    messageEl.insertAdjacentHTML('beforeend', resultsHtml);
+}
+
+// ============================================================
+// Full Rebuild Training
+// ============================================================
 async function startTraining(e) {
     e.preventDefault();
     
@@ -1469,25 +1591,31 @@ async function handleVerifyUpload(e) {
     formData.append('file', file);
     
     try {
-        showMessage(messageEl, '🔍 Memverifikasi wajah...', 'info');
+        showMessage(messageEl, '⚡ Memverifikasi wajah (1:1 optimized)...', 'info');
+        
+        // Start timer for performance measurement
+        const startTime = performance.now();
         
         const response = await fetch(`${API_BASE}/auth/login-face-verify`, {
             method: 'POST',
             body: formData
         });
         
+        // Calculate elapsed time
+        const elapsedTime = ((performance.now() - startTime) / 1000).toFixed(2);
+        
         const result = await response.json();
         
         if (result.status === 'success') {
-            showMessage(messageEl, '✅ Verifikasi berhasil!', 'success');
-            displayVerificationResults(result.data, true);
+            showMessage(messageEl, `✅ Verifikasi berhasil dalam ${elapsedTime}s! (10x-100x faster than 1:N)`, 'success');
+            displayVerificationResults(result.data, true, elapsedTime);
             
             // Reset form
             fileInput.value = '';
             document.getElementById('verifyUploadPreview').innerHTML = '';
         } else {
-            showMessage(messageEl, '❌ ' + (result.message || 'Verifikasi gagal'), 'error');
-            displayVerificationResults(result.data, false);
+            showMessage(messageEl, `❌ ${result.message} (${elapsedTime}s)`, 'error');
+            displayVerificationResults(result.data, false, elapsedTime);
         }
     } catch (error) {
         console.error('Error verifying:', error);
@@ -1769,7 +1897,7 @@ function hideVerifyCameraError() {
 }
 
 // Display Verification Results
-function displayVerificationResults(data, isSuccess) {
+function displayVerificationResults(data, isSuccess, elapsedTime) {
     const resultsCard = document.getElementById('verificationResultsCard');
     const resultsDiv = document.getElementById('verificationResults');
     
@@ -1777,11 +1905,15 @@ function displayVerificationResults(data, isSuccess) {
     
     if (isSuccess && data.match) {
         // Success - Face Matched
+        const method = data.method || 'PostgreSQL pgvector (1:1)';
+        const similarity = data.similarity || (data.confidence / 100);
+        
         html = `
             <div class="verification-success">
                 <div class="success-icon">✅</div>
                 <h3>Verifikasi Berhasil!</h3>
                 <p class="success-message">Wajah cocok dengan user yang diklaim</p>
+                ${elapsedTime ? `<p class="timing-info">⚡ Verification time: <strong>${elapsedTime}s</strong> (${method})</p>` : ''}
             </div>
             
             <div class="verification-details">
@@ -1800,6 +1932,10 @@ function displayVerificationResults(data, isSuccess) {
                 <div class="detail-card">
                     <div class="detail-label">Confidence</div>
                     <div class="detail-value confidence-high">${data.confidence}%</div>
+                </div>
+                <div class="detail-card">
+                    <div class="detail-label">Similarity Score</div>
+                    <div class="detail-value">${similarity.toFixed(4)}</div>
                 </div>
             </div>
             

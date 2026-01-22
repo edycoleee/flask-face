@@ -81,4 +81,38 @@ def view_photo(user_id, photo_id):
     return send_file(filepath, mimetype='image/png')
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    # Check if SSL certificates exist for HTTPS
+    cert_file = 'certs/cert.pem'
+    key_file = 'certs/key.pem'
+    
+    if os.path.exists(cert_file) and os.path.exists(key_file):
+        # HTTPS mode (production)
+        print("=" * 60)
+        print("🔒 HTTPS MODE ENABLED")
+        print("=" * 60)
+        print(f"Certificate: {cert_file}")
+        print(f"Key: {key_file}")
+        print("Server running on https://0.0.0.0:443")
+        print("=" * 60)
+        
+        app.run(
+            host='0.0.0.0',
+            port=443,
+            ssl_context=(cert_file, key_file),
+            debug=False
+        )
+    else:
+        # HTTP mode (development)
+        print("=" * 60)
+        print("⚠️  HTTP MODE (Development)")
+        print("=" * 60)
+        print("SSL certificates not found.")
+        print("Server running on http://0.0.0.0:5000")
+        print("For HTTPS: Generate certificates in certs/ folder")
+        print("=" * 60)
+        
+        app.run(
+            host='0.0.0.0',
+            port=5000,
+            debug=True
+        )

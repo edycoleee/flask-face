@@ -1,0 +1,64 @@
+# ============================================================
+# FLASK APPLICATION SERVICE ONLY
+# ============================================================
+# Flask face recognition app with InsightFace
+# Usage: docker-compose -f docker-compose.app.yml up -d --build
+# ============================================================
+
+version: '3.8'
+
+services:
+  flask-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: face-app
+    environment:
+      # Database connection (external PostgreSQL)
+      - DB_HOST=192.168.171.184
+      - DB_PORT=5432
+      - DB_NAME=face_db
+      - DB_USER=sultan
+      - DB_PASSWORD=Sulfat123#!
+      # Flask configuration
+      - FLASK_APP=run.py
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
+    ports:
+      # HTTP
+      - "192.168.171.184:5000:5000"
+      # HTTPS (enabled - SSL certificates generated)
+      - "192.168.171.184:443:443"
+    volumes:
+      # Application code (untuk development hot-reload)
+      - ./app:/app/app:ro
+      # Data directories (persistent)
+      - ./dataset:/app/dataset
+      - ./models:/app/models
+      - ./logs:/app/logs
+      - ./instance:/app/instance
+      # SSL certificates (enabled)
+      - ./certs:/app/certs:ro
+    networks:
+      - face_network
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/halo"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Dummy postgres reference (untuk depends_on)
+  # Actual postgres running di docker-compose.db.yml
+  postgres:
+    image: tianon/true
+    restart: "no"
+    networks:
+      - face_network
+
+networks:
+  face_network:
+    external: true
